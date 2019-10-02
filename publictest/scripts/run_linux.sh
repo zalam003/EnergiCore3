@@ -20,6 +20,12 @@ fi
 sudo apt update
 sudo apt install dnsutils -y
 
+# Make executable
+if [ ! -x $HOME/energi3/bin/energi3-linux-amd64 ]
+then
+    chmod +x $$HOME/energi3/bin/energi3-linux-amd64
+fi
+
 # Set variables
 LOGFILE=$HOME/.energicore3/testnet/log/energicore3.log
 IP=`dig +short myip.opendns.com @resolver1.opendns.com`
