@@ -61,9 +61,6 @@ then
         mkdir -p "${HOME}/Library/Application Support/EnergiCore3/log"
 fi
 
-# Change to install directory
-cd $HOME/Downloads
-
 # Get current version installed
 INSTVER=`cat version.txt`
 #echo "INSTVER: " ${INSTVER}
@@ -86,9 +83,17 @@ case $? in
     2)
         echo "Installing newer version"
         #echo "$INSTVER < $VERSION"
+        
+        # Change to install directory
+        cd $HOME/Downloads
+
         echo "Downloading ${VERSION} for ${OSVER} in `pwd`"
         wget https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/${VERSION}/energi3-${OSVER}-10.6-amd64
         chmod +x energi3-${OSVER}-10.6-amd64
+        
+        echo "Downloading script to start Energi Core Node server: run_macos.sh"
+        curl -sL https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_macos.sh > run_macos.sh
+        chmod +x run_macos.sh
 
         # Update version file
         echo $VERSION > version.txt
