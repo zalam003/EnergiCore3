@@ -44,5 +44,14 @@ then
         console 2>> $LOGFILE
 else
     echo "Cannot determine external IP address"
-    echo "Run manually: $HOME/Downloads/energi3-darwin-10.6-amd64 --testnet console 2>> \"$LOGFILE\" "
+    $HOME/Downloads/energi3-darwin-10.6-amd64 \
+        --masternode \
+        --testnet \
+        --mine \
+        --rpcapi admin,eth,web3,rpc,personal \
+        --rpc \
+        --rpcport 49796 \
+        --rpcaddr "127.0.0.1" \
+        --verbosity 3 \
+        console 2>> $LOGFILE
 fi
