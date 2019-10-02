@@ -16,6 +16,15 @@ then
         mkdir -p "${HOME}/Library/Application Support/EnergiCore3/testnet/log"
 fi
 
+# Install dig which is part of bind
+brew install bind
+
+# Make executable
+if [ ! -x $HOME/Downloads/energi3-darwin-10.6-amd64 ]
+then
+    chmod +x $HOME/Downloads/energi3-darwin-10.6-amd64
+fi
+
 # Set variables
 LOGFILE="${HOME}/Library/Application Support/EnergiCore3/testnet/log/energicore3.log"
 IP=`dig +short myip.opendns.com @resolver1.opendns.com`
