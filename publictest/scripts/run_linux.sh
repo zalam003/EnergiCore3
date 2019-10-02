@@ -1,10 +1,10 @@
 #!/bin/bash
 #####################################################################
-# Description: This script is to aide in setting up Energi 3.x aka
-#              Gen3 in a Unix environment
+# Description: This script is to start energicore3 public test node
+#              server
 #
 # Download this script
-# wget https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/pubtest_install_macos.sh )
+# wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_linux.sh
 #####################################################################
 #
 
@@ -33,4 +33,7 @@ then
         --rpcaddr "127.0.0.1" \
         --verbosity 3 \
         console 2>> $LOGFILE
+else
+    echo "Cannot determine external IP address"
+    echo "Run manually: energi3-linux-amd-64 --testnet console"
 fi
