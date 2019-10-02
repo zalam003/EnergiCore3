@@ -2,6 +2,9 @@
 #####################################################################
 # Description: This script is to aide in setting up Energi 3.x aka
 #              Gen3 in a Unix environment
+#
+# Run this script
+# bash -i <( curl -sL https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/pubtest_install_linux.sh )
 #####################################################################
 #
 
