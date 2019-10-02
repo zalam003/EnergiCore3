@@ -16,6 +16,10 @@ then
         mkdir -p $HOME/.energicore3/testnet/log
 fi
 
+# Install dig
+sudo apt update
+sudo apt install dnsutils -y
+
 # Set variables
 LOGFILE=$HOME/.energicore3/testnet/log/energicore3.log
 IP=`dig +short myip.opendns.com @resolver1.opendns.com`
@@ -35,5 +39,14 @@ then
         console 2>> $LOGFILE
 else
     echo "Cannot determine external IP address"
-    echo "Run manually: energi3-linux-amd-64 --testnet console"
+    energi3-linux-amd64 \
+        --masternode \
+        --testnet \
+        --mine \
+        --rpcapi admin,eth,web3,rpc,personal \
+        --rpc \
+        --rpcport 49796 \
+        --rpcaddr "127.0.0.1" \
+        --verbosity 3 \
+        console 2>> $LOGFILE
 fi
