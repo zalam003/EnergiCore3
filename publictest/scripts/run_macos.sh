@@ -17,7 +17,7 @@ then
 fi
 
 # Install dig which is part of bind
-brew install bind
+#brew install bind
 
 # Make executable
 if [ ! -x $HOME/Downloads/energi3-darwin-10.6-amd64 ]
