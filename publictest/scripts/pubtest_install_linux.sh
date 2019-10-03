@@ -11,6 +11,8 @@
 # Uncomment for debugging
 #set -x
 
+# Set Previos version to save a copy
+OLD_VERSION=0.5.4
 # Set version to install
 VERSION=0.5.5
 
@@ -94,6 +96,7 @@ case $? in
         cd $HOME/energi3/bin
 
         echo "Downloading ${VERSION} for ${OSVER}"
+        mv energi3-${OSVER}-amd64 energi3-${OSVER}-amd64-${OLD_VERSION}
         wget https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/${VERSION}/energi3-${OSVER}-amd64
         chmod +x energi3-${OSVER}-amd64
 
