@@ -69,9 +69,9 @@ if [ -f $HOME/Downloads/version.txt ]
 then
     INSTVER=`cat $HOME/Downloads/version.txt`
 else
-    INSTVER=0
+    INSTVER=0.0.1
 fi
-#echo "INSTVER: " ${INSTVER}
+echo "INSTVER: " ${INSTVER}
 
 # Compare and run install if needed
 vercomp $INSTVER $VERSION
