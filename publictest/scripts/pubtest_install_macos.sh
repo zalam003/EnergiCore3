@@ -12,7 +12,7 @@
 #set -x
 
 # Set version to install
-VERSION=0.5.4
+VERSION=0.5.5
 
 # Check OS
 if [ `uname` == "Darwin" ]
