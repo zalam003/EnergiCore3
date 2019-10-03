@@ -11,6 +11,8 @@
 # Uncomment for debugging
 #set -x
 
+# Previous version
+OLD_VERSION=0.5.4
 # Set version to install
 VERSION=0.5.5
 
