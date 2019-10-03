@@ -65,7 +65,12 @@ then
 fi
 
 # Get current version installed
-INSTVER=`cat $HOME/Downloads/version.txt`
+if [ -f $HOME/Downloads/version.txt ]
+then
+    INSTVER=`cat $HOME/Downloads/version.txt`
+else
+    INSTVER=0
+fi
 #echo "INSTVER: " ${INSTVER}
 
 # Compare and run install if needed
