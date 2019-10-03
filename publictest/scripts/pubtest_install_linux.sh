@@ -70,7 +70,12 @@ then
 fi
 
 # Get current version installed
-INSTVER=`cat $HOME/energi3/bin/version.txt`
+if [ -f $HOME/energi3/bin/version.txt ]
+then
+    INSTVER=`cat $HOME/energi3/bin/version.txt`
+else
+    INSTVER=0.0.1
+fi
 #echo "INSTVER: " ${INSTVER}
 
 # Compare and run install if needed
