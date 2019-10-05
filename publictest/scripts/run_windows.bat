@@ -19,4 +19,5 @@ set "DEFAULT_EXE_LOCATION=%INSTALL_DIR%\energi3-windows-4.0-amd64.exe"
 cd "%INSTALL_DIR%"
 
 @echo Starting Energi Core Node %VERSION%
-%windir%\system32\cmd.exe /c %DEFAULT_EXE_LOCATION% --testnet console 2> %DATA_DIR%\enegi3debug.log
+%windir%\system32\cmd.exe /c %DEFAULT_EXE_LOCATION% --testnet console 2> %BLOCKCHAIN_DIR%\enegi3debug.log
+pause
