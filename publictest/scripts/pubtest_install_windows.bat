@@ -5,7 +5,7 @@
 ::              Gen3 in a Unix environment
 ::
 :: Run this script
-:: bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/pubtest_install_windows.bat" "c:%userprofile%\pubtest_install_windows.bat"
+:: bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/pubtest_install_windows.bat" "%userprofile%\pubtest_install_windows.bat"
 ::####################################################################
 
 setlocal ENABLEEXTENSIONS
