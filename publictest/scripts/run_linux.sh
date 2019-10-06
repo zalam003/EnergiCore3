@@ -33,7 +33,6 @@ IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 if [ "x$IP" != "x" ]
 then
    energi3-linux-amd64 \
-        --masternode \
         --nat extip:${IP} \
         --testnet \
         --mine \
@@ -46,7 +45,6 @@ then
 else
     echo "Cannot determine external IP address"
     energi3-linux-amd64 \
-        --masternode \
         --testnet \
         --mine \
         --rpcapi admin,eth,web3,rpc,personal \
