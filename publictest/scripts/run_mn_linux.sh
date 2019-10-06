@@ -40,4 +40,3 @@ else
         --verbosity 3 \
         console 2>> $LOGFILE
 fi
-fi
