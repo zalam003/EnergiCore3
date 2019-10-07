@@ -26,7 +26,6 @@ fi
 LOGFILE=$HOME/.energicore3/testnet/log/energicore3.log
 
 energi3-linux-amd64 \
-        --nat extip:${IP} \
         --testnet \
         --mine \
         --rpcapi admin,eth,web3,rpc,personal \
