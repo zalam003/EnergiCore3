@@ -1,4 +1,12 @@
 #!/bin/bash
+#####################################################################
+# Description: This script is to start energicore3 public test node
+#              masternode server
+#
+# Download this script
+# wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_linux.sh
+#####################################################################
+#
 
 export PATH=$HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:$HOME/energi3/bin
 
