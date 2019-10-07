@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #####################################################################
 # Description: This script is to start energicore3 public test node
-#              server
+#              staking server
 #
 # Download this script
 # curl -sL https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_macos.sh > run_macos.sh
@@ -27,13 +27,10 @@ fi
 
 # Set variables
 LOGFILE="${HOME}/Library/Application Support/EnergiCore3/testnet/log/energicore3.log"
-IP=`dig +short myip.opendns.com @resolver1.opendns.com`
+# IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 
-if [ "x$IP" != "x" ]
-then
-   $HOME/Downloads/energi3-darwin-10.6-amd64 \
-        --masternode \
-        --nat extip:${IP} \
+# Start staking server
+$HOME/Downloads/energi3-darwin-10.6-amd64 \
         --testnet \
         --mine \
         --rpcapi admin,eth,web3,rpc,personal \
@@ -42,16 +39,4 @@ then
         --rpcaddr "127.0.0.1" \
         --verbosity 3 \
         console 2>> $LOGFILE
-else
-    echo "Cannot determine external IP address"
-    $HOME/Downloads/energi3-darwin-10.6-amd64 \
-        --masternode \
-        --testnet \
-        --mine \
-        --rpcapi admin,eth,web3,rpc,personal \
-        --rpc \
-        --rpcport 49796 \
-        --rpcaddr "127.0.0.1" \
-        --verbosity 3 \
-        console 2>> $LOGFILE
-fi
+
