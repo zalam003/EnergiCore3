@@ -34,18 +34,18 @@ echo %~1 is %result% %~2
 exit /b
 
 :compareVersions  version1  version2
-::
-:: Compares two version numbers and returns the result in the ERRORLEVEL
-::
-:: Returns 1 if version1 > version2
-::         0 if version1 = version2
-::        -1 if version1 < version2
-::
-:: The nodes must be delimited by . or , or -
-::
-:: Nodes are normally strictly numeric, without a 0 prefix. A letter suffix
-:: is treated as a separate node
-::
+rem
+rem  Compares two version numbers and returns the result in the ERRORLEVEL
+rem 
+rem Returns 1 if version1 > version2
+rem         0 if version1 = version2
+rem        -1 if version1 < version2
+rem
+rem The nodes must be delimited by . or , or -
+rem
+rem Nodes are normally strictly numeric, without a 0 prefix. A letter suffix
+rem is treated as a separate node
+rem
 setlocal enableDelayedExpansion
 set "v1=%~1"
 set "v2=%~2"
