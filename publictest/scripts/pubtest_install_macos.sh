@@ -100,9 +100,13 @@ case $? in
         curl https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/${VERSION}/energi3-${OSVER}-10.6-amd64 --output energi3-${OSVER}-10.6-amd64
         chmod +x energi3-${OSVER}-10.6-amd64
         
-        echo "Downloading script to start Energi Core Node server: run_macos.sh"
+        echo "Downloading staking script to start Energi Core Node server: run_macos.sh"
         curl -sL https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_macos.sh > run_macos.sh
         chmod +x run_macos.sh
+        
+        echo "Downloading masternode script to start Energi Core Node server: run_macos.sh"
+        curl -sL https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_macos.sh > run_mn_macos.sh
+        chmod +x run_mn_macos.sh
 
         # Update version file
         echo $VERSION > version.txt
