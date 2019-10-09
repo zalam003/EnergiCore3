@@ -86,8 +86,11 @@ exit /b
   @echo Downloading Public Test Energi Core Node
   bitsadmin /transfer DLPubTestNode /download /priority foreground "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%VERSION%/energi3-windows-4.0-amd64.exe" "%INSTALL_DIR%\energi3-windows-4.0-amd64.exe"
   
-  @echo Downloading run_windows.bat script
+  @echo Downloading staking batch script
   bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat" "%INSTALL_DIR%\run_windows.bat"
+  
+  @echo Downloading masternode batch script
+  bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_windows.bat" "%INSTALL_DIR%\run_mn_windows.bat"
   
   goto :FINISH
 
