@@ -105,9 +105,13 @@ case $? in
         wget https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/${VERSION}/energi3-${OSVER}-amd64
         chmod +x energi3-${OSVER}-amd64
 
-        echo "Downloading script to start Energi Core Node server"
+        echo "Downloading staking script to start Energi Core Node server"
         wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_linux.sh
         chmod +x run_linux.sh
+        
+        echo "Downloading masternode script to start Energi Core Node server"
+        wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_linux.sh
+        chmod +x run_mn_linux.sh
         
         # Update version file
         echo $VERSION > version.txt
