@@ -23,11 +23,13 @@ set "DEFAULT_EXE_LOCATION=%INSTALL_DIR%\energi3-windows-4.0-amd64.exe"
 cd "%INSTALL_DIR%"
 
 @echo Starting Energi Core Node %VERSION%
+@echo Update your account information in the unlock parameter.
+@echo Update/create a file called passwd.txt. Include your passphrase in the file
 %windir%\system32\cmd.exe /c %DEFAULT_EXE_LOCATION%^
     --masternode^
     --testnet^
     --mine^
-    --unlock 0x16c5074d9fc6afdbc021a8e44c8511d1a090f9ad^
+    --unlock 0x16c5....f9ad^
     --password passwd.txt^
     --rpcapi admin,eth,web3,rpc,personal^
     --rpc^
