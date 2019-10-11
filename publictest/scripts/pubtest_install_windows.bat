@@ -92,6 +92,9 @@ exit /b
   @echo Downloading masternode batch script
   bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_windows.bat" "%INSTALL_DIR%\run_mn_windows.bat"
   
+  @echo Downloading passwd.txt file
+  bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/passwd.txt" "%INSTALL_DIR%\passwd.txt"
+  
   goto :FINISH
 
 
