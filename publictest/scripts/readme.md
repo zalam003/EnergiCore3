@@ -9,6 +9,7 @@ bitsadmin /transfer DLInstStartScript /download /priority foreground "https://ra
 <h3>Run scripts for Windows</h3>
 - run_windows.bat: Start staking server on Windows<br>
 - run_mn_windows.bat: Start masternode on Windows<br>
+- passwd.txt: File with passphrase to start masternode<br>
 <br>
 
 <h2>Install and run on MacOS</h2>
