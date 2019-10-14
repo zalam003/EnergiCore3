@@ -12,9 +12,9 @@ setlocal ENABLEEXTENSIONS
 
 REM ###===> Update if needed
 REM # Save previous version
-set "OLD_VERSION=0.5.4"
+set "OLD_VERSION=0.5.5"
 REM # Set version to install
-set "VERSION=0.5.5"
+set "VERSION=0.5.7"
 
 set "INSTALL_DIR=C:\Apps\EnergiCore3"
 set "DATA_DIR=EnergiCore3\testnet\energi3"
