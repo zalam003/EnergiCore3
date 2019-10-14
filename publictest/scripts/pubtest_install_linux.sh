@@ -12,9 +12,9 @@
 #set -x
 
 # Set Previos version to save a copy
-OLD_VERSION=0.5.4
+OLD_VERSION=0.5.5
 # Set version to install
-VERSION=0.5.5
+VERSION=0.5.7
 
 # Check OS
 if [ `uname` == "Linux" ]
