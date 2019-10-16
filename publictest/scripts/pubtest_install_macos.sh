@@ -107,6 +107,10 @@ case $? in
         echo "Downloading masternode script to start Energi Core Node server: run_macos.sh"
         curl -sL https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_macos.sh > run_mn_macos.sh
         chmod +x run_mn_macos.sh
+        
+        echo "Download javascript"
+        wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js
+        chmod 644 utils.js
 
         # Update version file
         echo $VERSION > version.txt
