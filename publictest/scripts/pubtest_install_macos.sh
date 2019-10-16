@@ -109,7 +109,7 @@ case $? in
         chmod +x run_mn_macos.sh
         
         echo "Download javascript"
-        wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js
+        curl -sL https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js > utils.js
         chmod 644 utils.js
 
         # Update version file
