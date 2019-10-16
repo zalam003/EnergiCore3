@@ -63,6 +63,12 @@ then
         mkdir -p $HOME/energi3/bin
 fi
 
+# Create JavaScript directory
+if [ ! -d $HOME/energi3/js ]
+then
+        mkdir -p $HOME/energi3/js
+fi
+
 #
 if [ ! -d $HOME/.energicore3/testnet/log ]
 then
@@ -112,6 +118,14 @@ case $? in
         echo "Downloading masternode script to start Energi Core Node server"
         wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_linux.sh
         chmod +x run_mn_linux.sh
+        
+        echo "Download javascript"
+        cd $HOME/energi3/js
+        wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js
+        chmod 644 utils.js
+        
+        # Change to bin directory
+        cd $HOME/energi3/bin
         
         # Update version file
         echo $VERSION > version.txt
