@@ -112,15 +112,18 @@ case $? in
         chmod +x energi3-${OSVER}-amd64
 
         echo "Downloading staking script to start Energi Core Node server"
+        mv run_linux.sh run_linux.sh.old
         wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_linux.sh
         chmod +x run_linux.sh
         
         echo "Downloading masternode script to start Energi Core Node server"
+        mv run_mn_linux.sh run_mn_linux.sh.old
         wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_linux.sh
         chmod +x run_mn_linux.sh
         
         echo "Download javascript"
         cd $HOME/energi3/js
+        mv utils.js utils.js.old
         wget https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js
         chmod 644 utils.js
         
