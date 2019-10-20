@@ -32,4 +32,4 @@ bash -i <( curl -sL https://raw.githack.com/zalam003/EnergiCore3/master/publicte
 <h3>Run scripts for Linux</h3>
 - run_linux.sh: Start staking server on Linux<br>
 - run_mn_linux.sh: Start masternode on Linux<br>
-- run_screen_linux.sh: Start masternode in ``screen`` on Linux<br>
+- run_screen_linux.sh: Start masternode in <i>screen</i> on Linux<br>
