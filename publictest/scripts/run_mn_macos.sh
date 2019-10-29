@@ -27,6 +27,7 @@ fi
 
 # Set variables
 LOGFILE="${HOME}/Library/Application Support/EnergiCore3/testnet/log/energicore3.log"
+JSHOME="$HOME/energi3/js"
 #IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 
 if [ -f ${HOME}/Library/Application\ Support/EnergiCore3/testnet/UTC* ]
@@ -34,6 +35,7 @@ then
    $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --masternode \
         --testnet \
+        --preload $JSHOME/utils.js \
         --mine \
         --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
@@ -45,6 +47,7 @@ else
     $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --masternode \
         --testnet \
+        --preload $JSHOME/utils.js \
         --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
         --rpcport 49796 \
