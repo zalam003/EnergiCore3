@@ -8,7 +8,7 @@
 #####################################################################
 #
 
-export PATH=$PATH:$HOME/Downloads
+export PATH=$PATH:$HOME/energi3/bin
 
 # Create directory for logfile
 if [ ! -d "${HOME}/Library/Application Support/EnergiCore3/testnet/log" ]
@@ -29,11 +29,10 @@ fi
 LOGFILE="${HOME}/Library/Application Support/EnergiCore3/testnet/log/energicore3.log"
 IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 
-if [ "x$IP" != "x" ]
+if [ -f ${HOME}/Library/Application\ Support/EnergiCore3/testnet/UTC* ]
 then
-   $HOME/Downloads/energi3-darwin-10.6-amd64 \
+   $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --masternode \
-        --nat extip:${IP} \
         --testnet \
         --mine \
         --rpcapi admin,eth,web3,rpc,personal \
@@ -43,11 +42,9 @@ then
         --verbosity 3 \
         console 2>> $LOGFILE
 else
-    echo "Cannot determine external IP address"
-    $HOME/Downloads/energi3-darwin-10.6-amd64 \
+    $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --masternode \
         --testnet \
-        --mine \
         --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
         --rpcport 49796 \
