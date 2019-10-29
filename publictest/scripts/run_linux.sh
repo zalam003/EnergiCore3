@@ -24,11 +24,13 @@ fi
 
 # Set variables
 LOGFILE=$HOME/.energicore3/testnet/log/energicore3.log
+JSHOME="$HOME/energi3/js"
 
 if [ -f ${HOME}/.energicore3/testnet/keystore/UTC* ]
 then
     energi3-linux-amd64 \
         --testnet \
+        --preload $JSHOME/utils.js \
         --mine \
         --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
@@ -39,6 +41,7 @@ then
 else
     energi3-linux-amd64 \
         --testnet \
+        --preload $JSHOME/utils.js \
         --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
         --rpcport 49796 \
