@@ -59,15 +59,21 @@ vercomp () {
 }
 
 # Create if directory does not exists
+if [ ! -d "${HOME}/energi3/bin" ]
+then
+        mkdir -p "${HOME}/energi3/bin"
+fi
+
+# Create if directory does not exists
 if [ ! -d "${HOME}/Library/Application Support/EnergiCore3/log" ]
 then
         mkdir -p "${HOME}/Library/Application Support/EnergiCore3/log"
 fi
 
 # Get current version installed
-if [ -f $HOME/Downloads/version.txt ]
+if [ -f $HOME/energi3/bin/version.txt ]
 then
-    INSTVER=`cat $HOME/Downloads/version.txt`
+    INSTVER=`cat $HOME/energi3/bin/version.txt`
 else
     INSTVER=0.0.1
 fi
@@ -93,9 +99,9 @@ case $? in
         #echo "$INSTVER < $VERSION"
         
         # Change to install directory
-        cd $HOME/Downloads
+        cd $HOME/energi3/bin
 
-        echo "Downloading ${VERSION} for ${OSVER} in `pwd`"
+        echo "Downloading ${VERSION} for ${OSVER} in `pwd`"        
         mv energi3-${OSVER}-10.6-amd64 energi3-${OSVER}-10.6-amd64-${OLD_VERSION}
         curl https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/${VERSION}/energi3-${OSVER}-10.6-amd64 --output energi3-${OSVER}-10.6-amd64
         chmod +x energi3-${OSVER}-10.6-amd64
@@ -109,8 +115,15 @@ case $? in
         chmod +x run_mn_macos.sh
         
         echo "Download javascript"
+        if [ ! -d "${HOME}/energi3/js" ]
+        then
+                mkdir -p "${HOME}/energi3/js"
+        fi
+        cd ${HOME}/energi3/js
         curl -sL https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js > utils.js
         chmod 644 utils.js
+        
+        cd $HOME/energi3/bin
 
         # Update version file
         echo $VERSION > version.txt
