@@ -31,7 +31,7 @@ JSHOME="$HOME/energi3/js"
 # IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 
 # Start staking server
-if [ -f ${HOME}/Library/Application\ Support/EnergiCore3/testnet/UTC* ]
+if [ -f ${HOME}/Library/Application\ Support/EnergiCore3/testnet/keystore/UTC* ]
 then
     $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --testnet \
