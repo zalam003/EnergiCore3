@@ -27,6 +27,7 @@ fi
 
 # Set variables
 LOGFILE="${HOME}/Library/Application Support/EnergiCore3/testnet/log/energicore3.log"
+JSHOME="$HOME/energi3/js"
 # IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 
 # Start staking server
@@ -34,6 +35,7 @@ if [ -f ${HOME}/Library/Application\ Support/EnergiCore3/testnet/UTC* ]
 then
     $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --testnet \
+        --preload $JSHOME/utils.js \
         --mine \
         --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
@@ -44,6 +46,7 @@ then
 else
     $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --testnet \
+        --preload $JSHOME/utils.js \
         --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
         --rpcport 49796 \
