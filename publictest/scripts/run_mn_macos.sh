@@ -27,7 +27,7 @@ fi
 
 # Set variables
 LOGFILE="${HOME}/Library/Application Support/EnergiCore3/testnet/log/energicore3.log"
-IP=`dig +short myip.opendns.com @resolver1.opendns.com`
+#IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 
 if [ -f ${HOME}/Library/Application\ Support/EnergiCore3/testnet/UTC* ]
 then
