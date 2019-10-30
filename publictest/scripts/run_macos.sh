@@ -26,7 +26,7 @@ then
 fi
 
 # Set variables
-LOGFILE="${HOME}/Library/Application Support/EnergiCore3/testnet/log/energicore3.log"
+LOGFILE="${HOME}/Library/Application\ Support/EnergiCore3/testnet/log/energicore3.log"
 JSHOME="$HOME/energi3/js"
 # IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 
