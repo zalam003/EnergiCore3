@@ -35,23 +35,23 @@ if [ -f ${HOME}/Library/Application\ Support/EnergiCore3/testnet/keystore/UTC* ]
 then
     $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --testnet \
-        --preload $JSHOME/utils.js \
+        --preload ${JSHOME}/utils.js \
         --mine \
         --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
         --verbosity 3 \
-        console 2>> $LOGFILE
+        console 2>> ${LOGFILE}
 else
     $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --testnet \
-        --preload $JSHOME/utils.js \
+        --preload ${JSHOME}/utils.js \
         --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
         --verbosity 3 \
-        console 2>> $LOGFILE
+        console 2>> ${LOGFILE}
 fi
 
