@@ -42,7 +42,7 @@ then
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
         --verbosity 3 \
-        console 2>> ${LOGFILE}
+        console 
 else
     $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --testnet \
@@ -52,6 +52,6 @@ else
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
         --verbosity 3 \
-        console 2>> ${LOGFILE}
+        console 
 fi
 
