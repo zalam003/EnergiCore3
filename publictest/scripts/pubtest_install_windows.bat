@@ -74,26 +74,36 @@ exit /b
 
 :NEWVERSION
   echo Installing new version %VERSION%
-  if Not exist "%INSTALL_DIR%\" (
-  @echo "Creating %INSTALL_DIR%"
-  md %INSTALL_DIR%
+  if Not exist "%INSTALL_DIR%\bin\" (
+  @echo "Creating %INSTALL_DIR%\bin"
+  md %INSTALL_DIR%\bin
   )
-  cd %INSTALL_DIR%
+  if Not exist "%INSTALL_DIR%\js\" (
+  @echo "Creating %INSTALL_DIR%\js"
+  md %INSTALL_DIR%\js
+  )
+
   @echo Downloading application...
   TIMEOUT /T 9
   
   bitsadmin /RESET /ALLUSERS
+  
   @echo Downloading Public Test Energi Core Node
-  bitsadmin /transfer DLPubTestNode /download /priority foreground "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%VERSION%/energi3-windows-4.0-amd64.exe" "%INSTALL_DIR%\energi3-windows-4.0-amd64.exe"
+  bitsadmin /transfer DLPubTestNode /download /priority foreground "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%VERSION%/energi3-windows-4.0-amd64.exe" "%INSTALL_DIR%\bin\energi3-windows-4.0-amd64.exe"
   
   @echo Downloading staking batch script
-  bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat" "%INSTALL_DIR%\run_windows.bat"
+  bitsadmin /transfer DLInstStakeScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat" "%INSTALL_DIR%\bin\run_windows.bat"
   
   @echo Downloading masternode batch script
-  bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_windows.bat" "%INSTALL_DIR%\run_mn_windows.bat"
+  bitsadmin /transfer DLInstMnScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_windows.bat" "%INSTALL_DIR%\bin\run_mn_windows.bat"
   
   @echo Downloading passwd.txt file
-  bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/passwd.txt" "%INSTALL_DIR%\passwd.txt"
+  bitsadmin /transfer DLInstPasswd /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/passwd.txt" "%INSTALL_DIR%\bin\passwd.txt"
+  
+  @echo Downloading utils.js JavaScript file
+  bitsadmin /transfer DLInstUtilJs /download /priority foreground "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js" "%INSTALL_DIR%\js\passwd.txt"
+  
+  cd %INSTALL_DIR%\bin
   
   goto :FINISH
 
