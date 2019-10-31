@@ -4,8 +4,8 @@
 :: Description: This script is to aide in setting up Energi 3.x aka
 ::              Gen3 in a Unix environment
 ::
-:: Run this script
-:: bitsadmin /transfer DLInstStartScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/pubtest_install_windows.bat" "%cd%\pubtest_install_windows.bat"
+:: Run this script on a Command terminal
+:: explorer.exe https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/pubtest_install_windows.bat
 ::####################################################################
 
 setlocal ENABLEEXTENSIONS
@@ -16,9 +16,9 @@ set "OLD_VERSION=0.5.5"
 REM # Set version to install
 set "VERSION=0.5.7"
 
-set "INSTALL_DIR=C:\Apps\EnergiCore3"
+set "INSTALL_DIR=C:\energi3"
 set "DATA_DIR=EnergiCore3\testnet\energi3"
-set "BLOCKCHAIN_DIR=%userprofile%\AppData\Roaming\%DATA_DIR%"
+set "BLOCKCHAIN_DIR=%APPDATA%\%DATA_DIR%"
 set "DEFAULT_EXE_LOCATION=%INSTALL_DIR%\energi3-windows-4.0-amd64.exe"
 
 :: Compare Versions
@@ -110,4 +110,4 @@ exit /b
 
 :FINISH
 @echo Done
-pause
+
