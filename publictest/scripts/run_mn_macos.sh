@@ -11,9 +11,9 @@
 export PATH=$PATH:$HOME/energi3/bin
 
 # Create directory for logfile
-if [ ! -d "${HOME}/Library/Application Support/EnergiCore3/testnet/log" ]
+if [ ! -d "${HOME}/Library/EnergiCore3/testnet/log" ]
 then
-        mkdir -p "${HOME}/Library/Application Support/EnergiCore3/testnet/log"
+        mkdir -p "${HOME}/Library/EnergiCore3/testnet/log"
 fi
 
 # Install dig which is part of bind
@@ -26,11 +26,11 @@ then
 fi
 
 # Set variables
-LOGFILE="${HOME}/Library/Application\ Support/EnergiCore3/testnet/log/energicore3.log"
-JSHOME="$HOME/energi3/js"
+LOGFILE="${HOME}/Library/EnergiCore3/testnet/log/energicore3.log"
+JSHOME="${HOME}/energi3/js"
 #IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 
-if [ -f ${HOME}/Library/Application\ Support/EnergiCore3/testnet/keystore/UTC* ]
+if [ -f ${HOME}/Library/EnergiCore3/testnet/keystore/UTC* ]
 then
    $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --masternode \
@@ -42,7 +42,7 @@ then
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
         --verbosity 3 \
-        console 2>> $LOGFILE
+        console 2>> ${LOGFILE}
 else
     $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
         --masternode \
@@ -53,5 +53,5 @@ else
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
         --verbosity 3 \
-        console 2>> $LOGFILE
+        console 2>> ${LOGFILE}
 fi
