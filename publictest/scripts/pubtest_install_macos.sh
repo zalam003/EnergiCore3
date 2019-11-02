@@ -65,9 +65,9 @@ then
 fi
 
 # Create if directory does not exists
-if [ ! -d "${HOME}/Library/Application Support/EnergiCore3/log" ]
+if [ ! -d "${HOME}/Library/EnergiCore3/testnet/log" ]
 then
-        mkdir -p "${HOME}/Library/Application Support/EnergiCore3/log"
+        mkdir -p "${HOME}/Library/EnergiCore3/testnet/log"
 fi
 
 # Get current version installed
