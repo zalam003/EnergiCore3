@@ -23,7 +23,7 @@ IP=`dig +short myip.opendns.com @resolver1.opendns.com`
 
 if [ "x$IP" != "x" ]
 then
-    energi3-linux-amd64 \
+    energi3 \
         --masternode \
         --nat extip:${IP} \
         --testnet \
@@ -36,8 +36,8 @@ then
         --verbosity 3 \
         console 2>> $LOGFILE
 else
-    echo "Cannot determine external IP address"
-    energi3-linux-amd64 \
+    echo "Lookup external IP address by going to http://ip.me"
+    energi3 \
         --masternode \
         --testnet \
         --mine \
