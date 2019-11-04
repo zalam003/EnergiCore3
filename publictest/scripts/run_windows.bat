@@ -10,13 +10,14 @@
 
 set "VERSION=0.5.5"
 
-set "INSTALL_DIR=C:\Apps\EnergiCore3"
+set "BIN_DIR=C:\energi3\bin"
 set "DATA_DIR=EnergiCore3\testnet\energi3"
-set "BLOCKCHAIN_DIR=%userprofile%\AppData\Roaming\%DATA_DIR%"
-set "DEFAULT_EXE_LOCATION=%INSTALL_DIR%\energi3-windows-4.0-amd64.exe"
+set "LOG_DIR=%APPDATA%\EnergiCore3\log"
+set "BLOCKCHAIN_DIR=%APPDATA%\%DATA_DIR%"
+set "DEFAULT_EXE_LOCATION=%BIN_DIR%\energi3.exe"
 
 @echo Changing to install directory
-cd "%INSTALL_DIR%"
+cd "%BIN_DIR%"
 
 @echo Starting Energi Core Node %VERSION%
 %windir%\system32\cmd.exe /c %DEFAULT_EXE_LOCATION% --testnet console 2> %BLOCKCHAIN_DIR%\enegi3debug.log
