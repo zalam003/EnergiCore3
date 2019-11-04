@@ -110,6 +110,7 @@ case $? in
         mv energi3-${OSVER}-amd64 energi3-${OSVER}-amd64-${OLD_VERSION}
         wget https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/${VERSION}/energi3-${OSVER}-amd64
         chmod +x energi3-${OSVER}-amd64
+        mv energi3-${OSVER}-amd64 energi3
 
         echo "Downloading staking script to start Energi Core Node server"
         mv run_linux.sh run_linux.sh.old
