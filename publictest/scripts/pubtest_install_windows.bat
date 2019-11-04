@@ -19,7 +19,7 @@ set "VERSION=0.5.7"
 set "INSTALL_DIR=C:\energi3"
 set "DATA_DIR=EnergiCore3\testnet\energi3"
 set "BLOCKCHAIN_DIR=%APPDATA%\%DATA_DIR%"
-set "DEFAULT_EXE_LOCATION=%INSTALL_DIR%\energi3-windows-4.0-amd64.exe"
+set "DEFAULT_EXE_LOCATION=%INSTALL_DIR%\energi3.exe"
 
 :: Compare Versions
 call :testVersions  %VERSION%      %OLD_VERSION%
@@ -89,7 +89,7 @@ exit /b
   bitsadmin /RESET /ALLUSERS
   
   @echo Downloading Public Test Energi Core Node
-  bitsadmin /transfer DLPubTestNode /download /priority foreground "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%VERSION%/energi3-windows-4.0-amd64.exe" "%INSTALL_DIR%\bin\energi3-windows-4.0-amd64.exe"
+  bitsadmin /transfer DLPubTestNode /download /priority foreground "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%VERSION%/energi3-windows-4.0-amd64.exe" "%INSTALL_DIR%\bin\energi3.exe"
   
   @echo Downloading staking batch script
   bitsadmin /transfer DLInstStakeScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat" "%INSTALL_DIR%\bin\run_windows.bat"
