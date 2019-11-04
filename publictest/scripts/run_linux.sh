@@ -17,9 +17,9 @@ then
 fi
 
 # Make executable
-if [ ! -x $HOME/energi3/bin/energi3-linux-amd64 ]
+if [ ! -x $HOME/energi3/bin/energi3 ]
 then
-    chmod +x $$HOME/energi3/bin/energi3-linux-amd64
+    chmod +x $$HOME/energi3/bin/energi3
 fi
 
 # Set variables
@@ -28,7 +28,7 @@ JSHOME="$HOME/energi3/js"
 
 if [ -f ${HOME}/.energicore3/testnet/keystore/UTC* ]
 then
-    energi3-linux-amd64 \
+    energi3 \
         --testnet \
         --preload $JSHOME/utils.js \
         --mine \
@@ -39,7 +39,7 @@ then
         --verbosity 3 \
         console 2>> $LOGFILE
 else
-    energi3-linux-amd64 \
+    energi3 \
         --testnet \
         --preload $JSHOME/utils.js \
         --rpcapi admin,eth,web3,rpc,personal \
