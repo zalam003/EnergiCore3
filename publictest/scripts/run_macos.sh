@@ -20,9 +20,9 @@ fi
 #brew install bind
 
 # Make executable
-if [ ! -x $HOME/energi3/bin/energi3-darwin-10.6-amd64 ]
+if [ ! -x $HOME/energi3/bin/energi3 ]
 then
-    chmod +x $HOME/energi3/bin/energi3-darwin-10.6-amd64
+    chmod +x $HOME/energi3/bin/energi3
 fi
 
 # Set variables
@@ -33,7 +33,7 @@ JSHOME="$HOME/energi3/js"
 # Start staking server
 if [ -f ${HOME}/Library/EnergiCore3/testnet/keystore/UTC* ]
 then
-    $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
+    $HOME/energi3/bin/ \
         --testnet \
         --preload ${JSHOME}/utils.js \
         --mine \
@@ -44,7 +44,7 @@ then
         --verbosity 3 \
         console 2>>${LOGFILE}
 else
-    $HOME/energi3/bin/energi3-darwin-10.6-amd64 \
+    $HOME/energi3/bin/energi3 \
         --testnet \
         --preload ${JSHOME}/utils.js \
         --rpcapi admin,eth,web3,rpc,personal \
