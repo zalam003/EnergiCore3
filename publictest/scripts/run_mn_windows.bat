@@ -19,6 +19,8 @@ set "DATA_DIR=EnergiCore3\testnet\energi3"
 set "LOG_DIR=%APPDATA%\EnergiCore3\testnet\log"
 set "BLOCKCHAIN_DIR=%APPDIR%\%DATA_DIR%"
 set "DEFAULT_EXE_LOCATION=%BIN_DIR%\energi3.exe"
+set "JSHOME=%BIN_DIR%\js"
+set "PERSONAL_ACCOUNT="
 
 @echo Changing to install directory
 cd "%BIN_DIR%"
@@ -30,8 +32,9 @@ cd "%BIN_DIR%"
     --masternode^
     --testnet^
     --mine^
-    --unlock 0x16c5....f9ad^
+    --unlock %PERSONAL_ACCOUNT%^
     --password passwd.txt^
+    --preload %JSHOME%\utils.js^
     --rpcapi admin,eth,web3,rpc,personal^
     --rpc^
     --rpcport 49796^
