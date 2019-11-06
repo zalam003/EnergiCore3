@@ -15,6 +15,7 @@ set "DATA_DIR=EnergiCore3\testnet\energi3"
 set "LOG_DIR=%APPDATA%\EnergiCore3\log"
 set "BLOCKCHAIN_DIR=%APPDATA%\%DATA_DIR%"
 set "DEFAULT_EXE_LOCATION=%BIN_DIR%\energi3.exe"
+set "JSHOME=%BIN_DIR%\js"
 
 @echo Changing to install directory
 cd "%BIN_DIR%"
