@@ -32,20 +32,28 @@ then
         --testnet \
         --preload $JSHOME/utils.js \
         --mine \
-        --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
+        --rpcapi admin,eth,web3,rpc,personal \
+        --ws \
+        --wsaddr "127.0.0.1" \
+        --wsport 49795 \
+        --wsapi db,eth,net,web3,personal \
         --verbosity 3 \
         console 2>> $LOGFILE
 else
     energi3 \
         --testnet \
         --preload $JSHOME/utils.js \
-        --rpcapi admin,eth,web3,rpc,personal \
         --rpc \
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
+        --rpcapi admin,eth,web3,rpc,personal \
+        --ws \
+        --wsaddr "127.0.0.1" \
+        --wsport 49795 \
+        --wsapi db,eth,net,web3,personal \
         --verbosity 3 \
         console 2>> $LOGFILE
 fi
