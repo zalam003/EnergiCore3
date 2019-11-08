@@ -35,11 +35,11 @@ then
         --rpc \
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
-        --rpcapi admin,eth,web3,rpc,personal \
+        --rpcapi admin,eth,web3,rpc,personal,energi3 \
         --ws \
         --wsaddr "127.0.0.1" \
         --wsport 49795 \
-        --wsapi db,eth,net,web3,personal \
+        --wsapi db,eth,net,web3,personal,energi3 \
         --verbosity 3 \
         console 2>> $LOGFILE
 else
@@ -49,11 +49,11 @@ else
         --rpc \
         --rpcport 49796 \
         --rpcaddr "127.0.0.1" \
-        --rpcapi admin,eth,web3,rpc,personal \
+        --rpcapi admin,eth,web3,rpc,personal,energi3 \
         --ws \
         --wsaddr "127.0.0.1" \
         --wsport 49795 \
-        --wsapi db,eth,net,web3,personal \
+        --wsapi db,eth,net,web3,personal,energi3 \
         --verbosity 3 \
         console 2>> $LOGFILE
 fi
