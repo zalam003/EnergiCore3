@@ -6,7 +6,7 @@
 ::              installations
 ::
 :: Download and run the batch script to:
-:: explorer.exe https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts/energi3-installer.bat
+:: explorer.exe https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts/energi3-win-installer.bat
 ::####################################################################
 
 setlocal ENABLEEXTENSIONS
