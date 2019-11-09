@@ -97,6 +97,9 @@ if exist %BIN_DIR%\%EXE_NAME% (
 set "OLD_VERSION=0.5.5"
 
 :: Get current version available from Github
+:: https://api.github.com/repos/energicryptocurrency/energi3/releases
+:: tag_name
+:: browser_download_url
 set /p VERSION=<%BIN_DIR%\version.txt
 set "VERSION=0.5.7"
 
