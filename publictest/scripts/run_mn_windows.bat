@@ -35,8 +35,12 @@ cd "%BIN_DIR%"
     --unlock %PERSONAL_ACCOUNT%^
     --password passwd.txt^
     --preload %JSHOME%\utils.js^
-    --rpcapi admin,eth,web3,rpc,personal^
     --rpc^
     --rpcport 49796^
     --rpcaddr "127.0.0.1"^
-   	--verbosity 3 console 2>> %LOG_DIR%\enegi3debug.log
+    --rpcapi admin,eth,web3,rpc,personal,energi^
+    --ws^
+    --wsaddr "127.0.0.1"^
+    --wsport 49795^
+    --wsapi admin,eth,net,web3,personal,energi^
+    --verbosity 3 console 2>> %LOG_DIR%\enegi3debug.log
