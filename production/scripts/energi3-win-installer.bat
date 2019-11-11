@@ -1,15 +1,25 @@
 @echo OFF
 
 ::####################################################################
-:: Description: This batch script is to aide in setting up Energi 3.x
-::              on a Windows PC. It can be used to upgrade existing
-::              installations
+:: Desc: Batch script to download and setup Energi 3.x on Windows PC.
+::       The script will upgrade an existing installation.
 ::
 :: Download and run the batch script to:
 :: explorer.exe https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts/energi3-win-installer.bat
 ::####################################################################
 
 setlocal ENABLEEXTENSIONS
+
+:: Check OS Architecture (32-bit or 64-bit)
+wmic os get osarchitecture | findstr bit > "%userprofile%\osarchitecture.txt"
+set /p osarch= < "%userprofile%\osarchitecture.txt"
+del "%userprofile%\osarchitecture.txt"
+:: remove whitespace
+set osarch=%osarch: =%
+if "%osarch%" NEQ "64-bit" (
+  @echo "Windows x86 %osarch% is not supported"
+  exit /b
+)
 
 :: Set Default Install Directory
 set "ENERGI3_HOME=C:\energi3"
@@ -19,9 +29,9 @@ set "ENERGI3_HOME=C:\energi3"
   set "CHK_HOME=Y"
   set /p ENERGI3_HOME="Enter Install Path (Default: %ENERGI3_HOME%): "
   set /p CHK_HOME="Is Install path correct: %ENERGI3_HOME% (Y/n): "
-  if /I not "%CHK_HOME%" == "Y" goto checkhome
+  if /I not "%CHK_HOME%" == "Y" goto :checkhome
 
-echo Energi Node v3.x will be installed in %ENERGI3_HOME%
+@echo Energi Node v3.x will be installed in %ENERGI3_HOME%
 
 :: Confirm Mainnet or Testnet
 :setNetwork
@@ -31,13 +41,13 @@ echo Energi Node v3.x will be installed in %ENERGI3_HOME%
   if /I "%isMainnet%" == "Y" (
     set "DATA_DIR=EnergiCore3"
     echo The application will be setup for Mainnet
-    goto setdir
+    goto :setdir
   )
 
   if /I "%isMainnet%" == "N" (
     set "DATA_DIR=EnergiCore3\testnet"
     echo The application will be setup for Testnet
-    goto setdir
+    goto :setdir
   )
 
 :: Set Directories
@@ -81,30 +91,49 @@ if Not exist "%TMP_DIR%\" (
   md %TMP_DIR%
 )
 
+:: Download utilities
+:downloadutils
+@echo Changing to the %TMP_DIR% folder.
+cd "%TMP_DIR%"
+
+@echo Downloading utility files.
+if exist "%TMP_DIR%\7za.exe" (
+  del "%TMP_DIR%\7za.exe"
+)
+if exist "%TMP_DIR%\util.7z" (
+  del "%TMP_DIR%\util.7z"
+)
+
+bitsadmin /RESET /ALLUSERS
+bitsadmin /TRANSFER DL7zipAndUtil /DOWNLOAD /PRIORITY FOREGROUND "https://www.dropbox.com/s/kqm6ki3j7kaauli/7za.exe?dl=1" "%TMP_DIR%\7za.exe"  "https://www.dropbox.com/s/x51dx1sg1m9wn7o/util.7z?dl=1" "%TMP_DIR%\util.7z"
+"%TMP_DIR%\7za.exe" x -y "%TMP_DIR%\util.7z" -o"%TMP_DIR%\"
+
 :: Check if Energi3 is installed and version installed
 if exist %BIN_DIR%\%EXE_NAME% (
   cd %BIN_DIR%
-  set "OLD_VERSION="
+  set "RUN_VERSION="
   FOR /f "tokens=1*delims=: " %%a IN ('%BIN_DIR%\%EXE_NAME% version ') DO (
-   IF "%%a"=="Version" SET "OLD_VERSION=%%b"
+   IF "%%a"=="Version" SET "RUN_VERSION=%%b"
   )
-  echo Current version of Energi3 installed: %OLD_VERSION%
+  set RUN_VERSION=%RUN_VERSION:-=&rem.%
+  @echo Current version of Energi3 installed: %RUN_VERSION%
 ) else (
-  echo Energi3 is not installed in this computer.
+  @echo Energi3 is not installed in %BIN_DIR% of this computer.
+  goto :NEWVERSION
 )
 
-:: Set for script testing
-set "OLD_VERSION=0.5.5"
-
-:: Get current version available from Github
-:: https://api.github.com/repos/energicryptocurrency/energi3/releases
-:: tag_name
-:: browser_download_url
-set /p VERSION=<%BIN_DIR%\version.txt
-set "VERSION=0.5.7"
+:: Check latest release version available from Github
+curl -s https://api.github.com/repos/energicryptocurrency/energi3/releases -o %TMP_DIR%\gitversion.txt
+set "GIT_VERSION="
+  FOR /f "tokens=1*delims=: " %%a IN (%TMP_DIR%\gitversion.txt ) DO (
+   IF %%a=="tag_name" SET GIT_VERSION=%%b
+  )
+set GIT_VERSION=%GIT_VERSION:v=%
+set GIT_VERSION=%GIT_VERSION:"=%
+set GIT_VERSION=%GIT_VERSION:,=%
 
 :: Compare Versions
-call :testVersions  %VERSION%      %OLD_VERSION%
+call :testVersions  %GIT_VERSION%  %VERSION%
 exit /b
 
 :testVersions  version1  version2
@@ -114,7 +143,6 @@ if %errorlevel% == -1 goto :OLDVERSION
 if %errorlevel% == 0 goto :SAMEVERSION
 echo %~1 is %result% %~2
 exit /b
-
 
 ::
 ::  Compares two version numbers and returns the result in the ERRORLEVEL
@@ -156,50 +184,11 @@ for %%C in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do set "%~1=!%~
 exit /b
 
 :NEWVERSION
-  @echo Changing to the %TMP_DIR% folder.
-  cd "%TMP_DIR%"
-
-  @echo Downloading utility files.
-  if exist "%TMP_DIR%\7za.exe" (
-    del "%TMP_DIR%\7za.exe"
-  )
-  if exist "%TMP_DIR%\util.7z" (
-    del "%TMP_DIR%\util.7z"
-  )
-  TIMEOUT /T 9
-
-  bitsadmin /RESET /ALLUSERS
-  bitsadmin /TRANSFER DL7zipAndUtil /DOWNLOAD /PRIORITY FOREGROUND "https://www.dropbox.com/s/kqm6ki3j7kaauli/7za.exe?dl=1" "%TMP_DIR%\7za.exe"  "https://www.dropbox.com/s/x51dx1sg1m9wn7o/util.7z?dl=1" "%TMP_DIR%\util.7z"
-  "%TMP_DIR%\7za.exe" x -y "%TMP_DIR%\util.7z" -o"%TMP_DIR%\"
-
-  :: Stop Energi3 if it is running
-  :: @echo Get %EXE_NAME% process ID
-  :: wmic process where "name='%EXE_NAME%'" get ExecutablePath | findstr %EXE_NAME% > "%TMP_DIR%\pid.tmp"
-  :: set /p wallet= < "%TMP_DIR%\pid.tmp"
-  :: del "%TMP_DIR%\pid.tmp"
-
-  :: if ["%wallet%"] NEQ [""] (
-  ::   for /F "skip=1" %%A in (
-  ::     'wmic process where "name='%EXE_NAME%'" get ProcessID'
-  ::   ) do (
-  ::     echo %%A >> "%TMP_DIR%\pid.txt"
-  ::   )
-  :: )
-
-  :: set /p walletpid= <"%TMP_DIR%\pid.txt"
-  :: if exist "%TMP_DIR%\pid.txt" (
-  ::   del "%TMP_DIR%\pid.txt"
-  ::   @echo Stop %DATA_DIR% wallet.
-  ::   TIMEOUT /T 3
-  ::   @echo "taskkill /PID %walletpid% /F"
-  ::   taskkill /PID %walletpid% /F
-  :: )
-
-  @echo Download Energi3 Node application...
+  @echo Download Energi3 Node Version: %GIT_VERSION%
   TIMEOUT /T 9
 
   @echo Downloading Public Test Energi Core Node
-  "%TMP_DIR%\wget.exe" --no-check-certificate "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%VERSION%/energi3-windows-4.0-amd64.exe?dl=1" -O "%BIN_DIR%\energi3.exe"
+  "%TMP_DIR%\wget.exe" --no-check-certificate "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%GIT_VERSION%/energi3-windows-4.0-amd64.exe?dl=1" -O "%BIN_DIR%\energi3.exe"
 
   @echo Downloading staking batch script
   "%TMP_DIR%\wget.exe" --no-check-certificate "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat" "%BIN_DIR%\run_windows.bat"
@@ -213,22 +202,21 @@ exit /b
   @echo Downloading utils.js JavaScript file
   "%TMP_DIR%\wget.exe" --no-check-certificate "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js" "%JS_DIR%\utils.js"
 
-  cd %BIN_DIR%\bin
-  goto :installFinish
+  cd %BIN_DIR%
+  goto :bootstrap
 
 
 :OLDVERSION
-  @echo Current version %OLD_VERSION% is newer.  Nothing to install.
-  goto :installFinish
+  @echo Current version %RUN_VERSION% is newer.  Nothing to install.
+  goto :bootstrap
 
 
 :SAMEVERSION
   @echo Versions are the same.  Nothing to install.
-  goto :installFinish
+  goto :bootstrap
 
 
-:installFinish
-
+:bootstrap
 ::@echo Please wait for the snapshot to download.
 ::"%TMP_DIR%\wget.exe" --no-check-certificate "https://www.dropbox.com/s/%BLK_HASH%/blocks_n_chains.tar.gz?dl=1" -O "%CONF_DIR%\blocks_n_chains.tar.gz"
 
@@ -245,42 +233,44 @@ exit /b
 ::)
 
 :createshortcut
-if not exist "%userprofile%\Desktop\Energi3.lnk" (
+if not exist "%userprofile%\Desktop\Energi3 Core.lnk" (
   set _a=%
   set _b=AppData
-  echo set WshShell = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
-  echo sLinkFile = "%userprofile%\Desktop\Energi3.lnk" >> CreateShortcut.vbs
-  echo Set oMyShortCut = WshShell.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
-  echo oMyShortcut.IconLocation = "%BIN_DIR%\energi.ico" >> CreateShortcut.vbs
+  @echo set WshShell = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
+  @echo sLinkFile = "%userprofile%\Desktop\Energi3.lnk" >> CreateShortcut.vbs
+  @echo Set oMyShortCut = WshShell.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
+  @echo oMyShortcut.IconLocation = "%BIN_DIR%\energi.ico" >> CreateShortcut.vbs
   if /I "%isMainnet%"=="Y" (
-    echo oMyShortCut.TargetPath = "C:\Windows\System32\cmd.exe /c %BIN_DIR%\%EXE_NAME% console 2> %_a%%_b%%_a%\%DATA_DIR%\debug.log" >> CreateShortcut.vbs
+    @echo oMyShortCut.TargetPath = "C:\Windows\System32\cmd.exe /c %BIN_DIR%\%EXE_NAME% console 2> %_a%%_b%%_a%\%DATA_DIR%\debug.log" >> CreateShortcut.vbs
   ) else (
-    echo oMyShortCut.TargetPath = "C:\Windows\System32\cmd.exe /c %BIN_DIR%\%EXE_NAME% --testnet console 2> %_a%%_b%%_a%\%DATA_DIR%\debug.log" >> CreateShortcut.vbs
+    @echo oMyShortCut.TargetPath = "C:\Windows\System32\cmd.exe /c %BIN_DIR%\%EXE_NAME% --testnet console 2> %_a%%_b%%_a%\%DATA_DIR%\debug.log" >> CreateShortcut.vbs
   )
-  echo oMyShortCut.WorkingDirectory = "%BIN_DIR%" >> CreateShortcut.vbs
-  echo oMyShortCut.Save >> CreateShortcut.vbs
+  @echo oMyShortCut.WorkingDirectory = "%BIN_DIR%" >> CreateShortcut.vbs
+  @echo oMyShortCut.Save >> CreateShortcut.vbs
   cscript CreateShortcut.vbs
   del CreateShortcut.vbs
-  echo Energi3 shortcut created on Desktop
+  @echo Energi3 shortcut created on Desktop
 ) else (
-  echo Energi3 shortcut exists on Desktop.
-  echo Nothing created.  Check to make sure it is up to date
+  @echo Energi3 shortcut exists on Desktop.
+  @echo Nothing created.  Check to make sure it is up to date
 )
 
 :: Remove Energi 2.x network files
-@echo Do you want to remove Energi 2.x blockchain files.
-set /p RemoveEnergi2="Y/N: "
+set "RemoveEnergi2=N"
+set /p RemoveEnergi2="Do you want to remove Energi 2.x blockchain files (y/N): "
+set "ENERGI2_CONF_DIR=%AppData%\EnergiCore"
 
 :energi2conf
 if /I "%RemoveEnergi2%"=="Y" (
   TIMEOUT /T 9
-  set "ENERGI2_CONF_DIR=%AppData%\EnergiCore"
   if Not exist "%ENERGI2_CONF_DIR%\" (
-    echo "Where is your Energi 2.x Configuration Directory
-  
+    @echo Default configuration directory %ENERGI2_CONF_DIR% does not exist.
+    set /p ENERGI2_CONF_DIR="Enter location of Energi 2.x config directory: "
     if Not exist "%ENERGI2_CONF_DIR%\" (
-      goto energi2conf
-    )
+      goto :energi2conf
+    ) else (
+	  goto :utilCleanup
+	)
   )
   rmdir "%ENERGI2_CONF_DIR%\blocks\" /s /q
   rmdir "%ENERGI2_CONF_DIR%\chainstate\" /s /q
@@ -315,18 +305,8 @@ del "%TMP_DIR%\pcre3.dll"
 del "%TMP_DIR%\regex2.dll"
 del "%TMP_DIR%\wget.exe"
 
-:: @echo Move back to Initial Working Directory.
-:: cd "%mycwd%"
-
-:: @echo Starting %DATA_DIR%
-:: if ["%wallet%"] == [""] (
-::   start "" "%DEFAULT_EXE_LOCATION%"
-::   echo Running %DEFAULT_EXE_LOCATION%
-:: ) else (
-::   start "" "%wallet%"
-::   echo Running %wallet%
-:: )
-:: @echo Please wait for the wallet to start and for the wallet to rescan.
-:: pause
+:: Set keystore password
+::setpassword
+::  @echo You can set password of your keystore account for automated start of staking/mining
 
 @echo Done
