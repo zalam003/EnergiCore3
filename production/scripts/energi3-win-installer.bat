@@ -62,7 +62,7 @@ set "CONF_DIR=%userprofile%\AppData\Roaming\%DATA_DIR%"
 set "EXE_NAME=energi3.exe"
 set "DATA_CONF=energi3.toml"
 
-:: Bootstrap
+:: Bootstrap Settings
 :: set "BLK_HASH=gsaqiry3h1ho3nh"
 :: set BOOTSTRAP_URL="https://www.dropbox.com/s/%BLK_HASH%/blocks_n_chains.tar.gz"
 
@@ -80,11 +80,6 @@ if Not exist "%BIN_DIR%\" (
 if Not exist "%JS_DIR%\" (
   @echo Creating directory: %JS_DIR%
   md %JS_DIR%
-)
-if Not exist "%PW_DIR%\" (
-  @echo Creating hidden directory: %PW_DIR%
-  md %PW_DIR%
-  attrib +r +h +s %PW_DIR%
 )
 if Not exist "%TMP_DIR%\" (
   @echo Creating directory: %TMP_DIR%
@@ -122,7 +117,13 @@ if exist %BIN_DIR%\%EXE_NAME% (
   goto :NEWVERSION
 )
 
+:: Set for script testing
+::set "RUN_VERSION=0.5.5"
+
 :: Check latest release version available from Github
+:: https://api.github.com/repos/energicryptocurrency/energi3/releases
+:: tag_name
+:: browser_download_url
 curl -s https://api.github.com/repos/energicryptocurrency/energi3/releases -o %TMP_DIR%\gitversion.txt
 set "GIT_VERSION="
   FOR /f "tokens=1*delims=: " %%a IN (%TMP_DIR%\gitversion.txt ) DO (
@@ -143,6 +144,7 @@ if %errorlevel% == -1 goto :OLDVERSION
 if %errorlevel% == 0 goto :SAMEVERSION
 echo %~1 is %result% %~2
 exit /b
+
 
 ::
 ::  Compares two version numbers and returns the result in the ERRORLEVEL
@@ -218,11 +220,11 @@ exit /b
 
 :bootstrap
 ::@echo Please wait for the snapshot to download.
-::"%TMP_DIR%\wget.exe" --no-check-certificate "https://www.dropbox.com/s/%BLK_HASH%/blocks_n_chains.tar.gz?dl=1" -O "%CONF_DIR%\blocks_n_chains.tar.gz"
+::"%TMP_DIR%\wget.exe" --no-check-certificate "%BOOTSTRAP_URL%?dl=1" -O "%CONF_DIR%\blocks_n_chains.tar.gz"
 
 ::if Not exist "%CONF_DIR%\blocks_n_chains.tar.gz" (
 ::  bitsadmin /RESET /ALLUSERS
-::  bitsadmin /TRANSFER blocks_n_chains.tar.gz /DOWNLOAD /PRIORITY FOREGROUND "https://www.dropbox.com/s/%BLK_HASH%/blocks_n_chains.tar.gz?dl=1" "%CONF_DIR%\blocks_n_chains.tar.gz"
+::  bitsadmin /TRANSFER blocks_n_chains.tar.gz /DOWNLOAD /PRIORITY FOREGROUND "%BOOTSTRAP_URL%?dl=1" "%CONF_DIR%\blocks_n_chains.tar.gz"
 ::)
 
 ::"%TMP_DIR%\7za.exe" e -y "%CONF_DIR%\blocks_n_chains.tar.gz" -o"%CONF_DIR%\"
@@ -306,7 +308,26 @@ del "%TMP_DIR%\regex2.dll"
 del "%TMP_DIR%\wget.exe"
 
 :: Set keystore password
-::setpassword
-::  @echo You can set password of your keystore account for automated start of staking/mining
+set "SETPWD=N"
+@echo You can set password of your keystore account for automated start of staking/mining.
+@echo It will create a secure/hidden file with the password.
+set /p SETPWD="Do you want to save your password? (y/N): "
+if /I "%SETPWD" == "Y" (
+  if Not exist "%PW_DIR%\" (
+    @echo Creating hidden directory: %PW_DIR%
+    md "%PW_DIR%"
+    attrib +r +h +s "%PW_DIR%"
+  )
+  cd "%PW_DIR%"
+  :setpassword
+	set /p ACCTPASSWD1="Enter your keystore account password: "
+	set /p ACCTPASSWD2="Re-enter your keystore account password: "
+	if "%ACCTPASSWD1%" NEQ "%ACCTPASSWD2%" (
+	  @echo Passwords do not match. Try again.
+	  goto :setpassword
+	)
+	@echo %ACCTPASSWD1% > %PW_DIR%\securefile.txt
+	attrib +r %PW_DIR%\securefile.txt
+)
 
 @echo Done
