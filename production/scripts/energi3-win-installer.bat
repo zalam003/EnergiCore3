@@ -75,15 +75,15 @@ del dir.tmp
 :: Create directories if it does not exist
 if Not exist "%BIN_DIR%\" (
   @echo Creating directory: %BIN_DIR%
-  md %BIN_DIR%
+  md "%BIN_DIR%"
 )
 if Not exist "%JS_DIR%\" (
   @echo Creating directory: %JS_DIR%
-  md %JS_DIR%
+  md "%JS_DIR%"
 )
 if Not exist "%TMP_DIR%\" (
   @echo Creating directory: %TMP_DIR%
-  md %TMP_DIR%
+  md "%TMP_DIR%"
 )
 
 :: Download utilities
@@ -105,7 +105,7 @@ bitsadmin /TRANSFER DL7zipAndUtil /DOWNLOAD /PRIORITY FOREGROUND "https://www.dr
 
 :: Check if Energi3 is installed and version installed
 if exist %BIN_DIR%\%EXE_NAME% (
-  cd %BIN_DIR%
+  cd "%BIN_DIR%"
   set "RUN_VERSION="
   FOR /f "tokens=1*delims=: " %%a IN ('%BIN_DIR%\%EXE_NAME% version ') DO (
    IF "%%a"=="Version" SET "RUN_VERSION=%%b"
@@ -185,6 +185,9 @@ exit /b
 for %%C in (a b c d e f g h i j k l m n o p q r s t u v w x y z) do set "%~1=!%~1:%%C=.%%C!"
 exit /b
 
+::
+:: Main program to download and setup Energi 3.x
+::
 :NEWVERSION
   @echo Download Energi3 Node Version: %GIT_VERSION%
   TIMEOUT /T 9
@@ -204,7 +207,7 @@ exit /b
   @echo Downloading utils.js JavaScript file
   "%TMP_DIR%\wget.exe" --no-check-certificate "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js" "%JS_DIR%\utils.js"
 
-  cd %BIN_DIR%
+  cd "%BIN_DIR%"
   goto :bootstrap
 
 
@@ -260,20 +263,25 @@ if not exist "%userprofile%\Desktop\Energi3 Core.lnk" (
 :: Remove Energi 2.x network files
 set "RemoveEnergi2=N"
 set /p RemoveEnergi2="Do you want to remove Energi 2.x blockchain files (y/N): "
-set "ENERGI2_CONF_DIR=%AppData%\EnergiCore"
+if /I "%isMainnet%"=="Y" (
+  set "ENERGI2_CONF_DIR=%AppData%\EnergiCore"
+  ) else (
+  set "ENERGI2_CONF_DIR=%AppData%\EnergiCore\testnet"
+)
 
 :energi2conf
 if /I "%RemoveEnergi2%"=="Y" (
-  TIMEOUT /T 9
   if Not exist "%ENERGI2_CONF_DIR%\" (
     @echo Default configuration directory %ENERGI2_CONF_DIR% does not exist.
     set /p ENERGI2_CONF_DIR="Enter location of Energi 2.x config directory: "
     if Not exist "%ENERGI2_CONF_DIR%\" (
       goto :energi2conf
-    ) else (
+      ) else (
 	  goto :utilCleanup
 	)
   )
+  @echo Deleting blockchain files from %ENERGI2_CONF_DIR%...
+  TIMEOUT /T 9
   rmdir "%ENERGI2_CONF_DIR%\blocks\" /s /q
   rmdir "%ENERGI2_CONF_DIR%\chainstate\" /s /q
   rmdir "%ENERGI2_CONF_DIR%\database\" /s /q
@@ -294,25 +302,25 @@ if /I "%RemoveEnergi2%"=="Y" (
 )
 
 :utilCleanup
-@echo Cleanup utilities files.
-TIMEOUT /T 3
-del "%TMP_DIR%\7za.exe"
-del "%TMP_DIR%\util.7z"
-del "%TMP_DIR%\grep.exe"
-del "%TMP_DIR%\libeay32.dll"
-del "%TMP_DIR%\libiconv2.dll"
-del "%TMP_DIR%\libintl3.dll"
-del "%TMP_DIR%\libssl32.dll"
-del "%TMP_DIR%\pcre3.dll"
-del "%TMP_DIR%\regex2.dll"
-del "%TMP_DIR%\wget.exe"
+  @echo Cleanup utilities files downloaded for setup from %TMP_DIR%
+  TIMEOUT /T 3
+  del "%TMP_DIR%\7za.exe"
+  del "%TMP_DIR%\util.7z"
+  del "%TMP_DIR%\grep.exe"
+  del "%TMP_DIR%\libeay32.dll"
+  del "%TMP_DIR%\libiconv2.dll"
+  del "%TMP_DIR%\libintl3.dll"
+  del "%TMP_DIR%\libssl32.dll"
+  del "%TMP_DIR%\pcre3.dll"
+  del "%TMP_DIR%\regex2.dll"
+  del "%TMP_DIR%\wget.exe"
 
 :: Set keystore password
 set "SETPWD=N"
 @echo You can set password of your keystore account for automated start of staking/mining.
 @echo It will create a secure/hidden file with the password.
 set /p SETPWD="Do you want to save your password? (y/N): "
-if /I "%SETPWD" == "Y" (
+if /I "%SETPWD%" == "Y" (
   if Not exist "%PW_DIR%\" (
     @echo Creating hidden directory: %PW_DIR%
     md "%PW_DIR%"
