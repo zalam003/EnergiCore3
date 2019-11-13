@@ -1,6 +1,10 @@
 @echo OFF
 
 ::####################################################################
+:: Copyright (c) 2019
+:: All rights reserved.
+:: THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+::
 :: Desc: Batch script to download and setup Energi 3.x on Windows PC.
 ::       The script will upgrade an existing installation.
 ::
@@ -54,7 +58,7 @@ set "ENERGI3_HOME=C:\energi3"
 :setdir
 set "BIN_DIR=%ENERGI3_HOME%\bin"
 set "JS_DIR=%ENERGI3_HOME%\js"
-set "PW_DIR=%ENERGI3_HOME%\securefolder"
+set "PW_DIR=%ENERGI3_HOME%\secure"
 set "TMP_DIR=%ENERGI3_HOME%\tmp"
 set "CONF_DIR=%userprofile%\AppData\Roaming\%DATA_DIR%"
 
@@ -193,19 +197,16 @@ exit /b
   TIMEOUT /T 9
 
   @echo Downloading Public Test Energi Core Node
-  "%TMP_DIR%\wget.exe" --no-check-certificate "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%GIT_VERSION%/energi3-windows-4.0-amd64.exe?dl=1" -O "%BIN_DIR%\energi3.exe"
+  "%TMP_DIR%\wget.exe" -4q -o- "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%GIT_VERSION%/energi3-windows-4.0-amd64.exe?dl=1" -O "%BIN_DIR%\energi3.exe"
 
   @echo Downloading staking batch script
-  "%TMP_DIR%\wget.exe" --no-check-certificate "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat" "%BIN_DIR%\run_windows.bat"
+  "%TMP_DIR%\wget.exe" -4q -o- "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat" -O "%BIN_DIR%\run_windows.bat"
   
   @echo Downloading masternode batch script
-  "%TMP_DIR%\wget.exe" --no-check-certificate "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_windows.bat" "%BIN_DIR%\run_mn_windows.bat"
-
-  @echo Downloading passwd.txt file
-  "%TMP_DIR%\wget.exe" --no-check-certificate "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/passwd.txt" "%PW_DIR%\passwd.txt"
+  "%TMP_DIR%\wget.exe" -4q -o- "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_windows.bat" -O "%BIN_DIR%\run_mn_windows.bat"
 
   @echo Downloading utils.js JavaScript file
-  "%TMP_DIR%\wget.exe" --no-check-certificate "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js" "%JS_DIR%\utils.js"
+  "%TMP_DIR%\wget.exe" -4q -o- "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js" -O "%JS_DIR%\utils.js"
 
   cd "%BIN_DIR%"
   goto :bootstrap
@@ -223,7 +224,8 @@ exit /b
 
 :bootstrap
 ::@echo Please wait for the snapshot to download.
-::"%TMP_DIR%\wget.exe" --no-check-certificate "%BOOTSTRAP_URL%?dl=1" -O "%CONF_DIR%\blocks_n_chains.tar.gz"
+:: --no-check-certificate
+::"%TMP_DIR%\wget.exe" -4q -o- "%BOOTSTRAP_URL%?dl=1" -O "%CONF_DIR%\blocks_n_chains.tar.gz"
 
 ::if Not exist "%CONF_DIR%\blocks_n_chains.tar.gz" (
 ::  bitsadmin /RESET /ALLUSERS
