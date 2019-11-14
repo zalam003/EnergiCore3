@@ -25,6 +25,14 @@ set "PERSONAL_ACCOUNT="
 @echo Changing to install directory
 cd "%BIN_DIR%"
 
+if %PERSONAL_ACCOUNT% == "" (
+  cls
+  @echo ERROR: You need to create a personal account before you run the script
+  @echo ERROR: After you have your personal account, edit the variable above
+  @echo ERROR: before running this scrit again.
+  exit /b
+)
+
 @echo Starting Energi Core Node %VERSION%
 @echo Update your account information in the unlock parameter.
 @echo Update/create a file called passwd.txt. Include your passphrase in the file
