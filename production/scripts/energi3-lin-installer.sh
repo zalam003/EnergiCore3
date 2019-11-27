@@ -71,6 +71,8 @@ _check_user () {
           # Set username
           USRNAME=nrgstaker
           INSTALLTYPE=new
+          echo "Adding user ${USRNAME}"
+          adduser --gecos "Energi Staking Account" --quiet ${USRNAME}
           ;;
         
         *)
@@ -121,6 +123,8 @@ _check_user () {
             INSTALLTYPE=new
             echo "${RED}New Install:${NC} Installing new version of Energi v3 as ${USRNAME}"
             echo "${RED}No Migration:${NC} Exiting Energi v2 will need to be manually migrated to Energi v3"
+            echo "Adding user ${USRNAME}"
+            adduser --gecos "Energi Staking Account" --quiet ${USRNAME}
           fi
           
           sleep 3
