@@ -27,20 +27,28 @@ bash -ic "$(wget -4qO- -o- https://raw.githubusercontent.com/energicryptocurrenc
 
 _os_arch () {
   # Check OS Architecture (32-bit or 64-bit)
-  echo "Checking if the OS architecture is supported"
+  echo -n "Checking if OS architecture is supported: "
   OSARCH=`uname -m`
   if [ "${OSARCH}" != "x86_64" ]
   then
-    echo "Linux ${OSARCH} is not supported"
+    echo "${RED}${OSARCH} is not supported${NC}"
     exit 0
   else
-    echo "The Linux OS is a ${OSARCH} architectecture and is ${RED}supported${NC} for installation"
+    echo "${GREEN}${OSARCH} is supported${NC}"
         sleep 0.3
   fi
 }
 
 _check_user () {
   RUNAS=`whoami`
+
+  if [ "${RUNAS}" != "root" ]
+  then
+    echo "${RED}*** You need to run the script as ${NC}root${RED}.   ***${NC}"
+    echo "${RED}*** Exiting the script. Login as ${NC}root${RED} and ***${NC}"
+    echo "${RED}*** run the script again.                  ***${NC}"
+    exit 0
+  fi
 
   CHKV3USRTMP=/tmp/chk_v3_usr.tmp
   find /home -name energi3.ipc | awk -F\/ '{print $3}' > ${CHKV3USRTMP}
@@ -61,7 +69,7 @@ _check_user () {
       # New:
       # v2 is not installed or already has been mograted
       #
-      echo "${RED}*** Checking if Energi v2 is installed on the server ***${NC}"
+      echo -n "Checking if Energi v2 is installed:       "
       CHKV2USRTMP=/tmp/chk_v2_usr.tmp
       find /home -name energi.conf | awk -F\/ '{print $3}' > ${CHKV2USRTMP}
       find /root -name energi.conf | awk -F\/ '{print $3}' >> ${CHKV2USRTMP}
@@ -69,7 +77,8 @@ _check_user () {
 
       case ${V2USRCOUNT} in
         0)
-          echo "${RED}*** Energi v2 is not installed on this server ***${NC}"
+          echo "${RED}V2 Not installed${NC}"
+          echo
           # Set username
           USRNAME=nrgstaker
           INSTALLTYPE=new
@@ -83,7 +92,8 @@ _check_user () {
           ;;
 
         *)
-          echo "${RED}*** Energi v2 is installed on the server  ***${NC}"
+          echo "${RED}V2 is installed${NC}"
+          echo
           isMigrate=""
           read -p "${BLUE}Do you want to migrate from Energi v2 to v3 (y/N):${NC} "
           isMigrate=${isMigrate,,}    # tolower
@@ -204,7 +214,8 @@ _setup_appdir () {
   CHK_HOME=N
   while [ ${CHK_HOME} != y ]
   do
-    read -r -p "Enter Full Path of where you wall to install Energi3 Node Software (${ENERGI3_HOME}): " TMP_HOME
+    echo "Enter Full Path of where you wall to install Energi3 Node Software"
+    read -r -p "(${ENERGI3_HOME}): " TMP_HOME
     if [ "x${TMP_HOME}" != "x" ]
     then
       export ENERGI3_HOME=${TMP_HOME}
@@ -1329,6 +1340,7 @@ ENERGIMENU
 # Set colors
 BLUE=`tput setaf 4`
 RED=`tput setaf 1`
+GREEN=`tput setaf 3`
 NC=`tput sgr0`
 
 # Bootstrap Settings
@@ -1370,6 +1382,10 @@ case ${INSTALLTYPE} in
     REPLY='x'
     read -p "Please select an option to get started (a, b, or x): " -r
     REPLY=${REPLY,,} # tolower
+    if [ "x${REPLY}" = "x" ]
+    then
+      REPLY='h'
+    fi
 
     case ${REPLY} in
       a)
@@ -1377,20 +1393,24 @@ case ${INSTALLTYPE} in
 
         # => Run as root
         _install_apt
-        set -x
         _restrict_logins
-        set +x
         _check_ismainnet
         _secure_host
         _check_clock
-        _setup_two_factor
+
+        REPLY=''
+        read -p "Do you want to install 2-Factor Authenticaion [Y/n]?: " -r
+        REPLY=${REPLY,,} # tolower
+        if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
+        then
+          _setup_two_factor
+        fi
+
         _add_swap
-        echo "Variables ${CONF_DIR} ${USRNAME}"
         _add_logrotate
 
         #sudo -u ${USRNAME} /bin/bash - << DOASUSR
         # => Run as user
-        echo "Variables" "${ENERGI3_HOME}" "${USRNAME}"
         _setup_appdir
         _install_energi3
 
@@ -1411,14 +1431,16 @@ case ${INSTALLTYPE} in
 
         ;;
 
-      *)
+      h)
         clear
-        echo "Usage: Please select an option to get started (a, b, c, d or x): "
+        echo "${RED}ERROR: ${NC}Need to select one of the following"
+        _menu_option_new
         echo
-        _menu_option
-        echo
+        echo "Restart the installer"
         exit 0
+
         ;;
+
     esac
 
   ;;
