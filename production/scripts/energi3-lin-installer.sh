@@ -608,10 +608,14 @@ _setup_two_factor() {
     echo "Google Authenticator install failed."
     return
   fi
-
-  mv "${USR_HOME}/.google_authenticator" "${USR_HOME}/.google_authenticator.temp"
-  CHMOD_G_AUTH=$( stat --format '%a' .google_authenticator.temp )
-  chmod 666 "${USR_HOME}/.google_authenticator.temp"
+  if [[ -f "${USR_HOME}/.google_authenticator" ]]
+  then
+    mv "${USR_HOME}/.google_authenticator" "${USR_HOME}/.google_authenticator.temp"
+    CHMOD_G_AUTH=$( stat --format '%a' ${USR_HOME}/.google_authenticator.temp )
+    chmod 666 "${USR_HOME}/.google_authenticator.temp"
+  else
+    CHMOD_G_AUTH=400
+  fi
   clear
 
   stty sane 2>/dev/null
@@ -1335,7 +1339,6 @@ echo -n ${NC}
 
 _menu_option_new () {
   echo "${NC}"
-  clear 2> /dev/null
   cat << "ENERGIMENU"
  Options:
     a) New server installation of Energi v3
@@ -1347,7 +1350,6 @@ ENERGIMENU
 
 _menu_option_mig () {
   echo "${NC}"
-  clear 2> /dev/null
   cat << "ENERGIMENU"
  Options:
     a) Upgrade Energi v2 to v3; automatic wallet migration
@@ -1359,7 +1361,6 @@ ENERGIMENU
 
 _menu_option_upgrade () {
   echo "${NC}"
-  clear 2> /dev/null
   cat << "ENERGIMENU"
  Options:
     a) Upgrade version of Energi v3
@@ -1372,7 +1373,6 @@ ENERGIMENU
 
 _end_instructions () {
   echo "${NC}"
-  clear 2> /dev/null
   echo -e "
  Thank you for your support of Energi! We wish you a successful staking.
  Login as ${USRNAME} and run the following script to start/stop the Node:
