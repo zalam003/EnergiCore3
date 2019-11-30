@@ -1315,7 +1315,7 @@ _setup_keystore_auto_pw () {
 }
 
 _ascii_logo () {
-  echo -e "\\e[0m"
+  echo "${GREEN}"
   clear 2> /dev/null
   cat << "ENERGI3"
       ___
@@ -1330,10 +1330,12 @@ _ascii_logo () {
     \::/  /    | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
      \/__/     |______|_| \_|______|_|  \_\\_____|_____|____/ 
 ENERGI3
+echo -n ${NC}
 }
 
 _menu_option_new () {
-  echo -e "\\e[0m"
+  echo "${NC}"
+  clear 2> /dev/null
   cat << "ENERGIMENU"
  Options:
     a) New server installation of Energi v3
@@ -1344,7 +1346,8 @@ ENERGIMENU
 }
 
 _menu_option_mig () {
-  echo -e "\\e[0m"
+  echo "${NC}"
+  clear 2> /dev/null
   cat << "ENERGIMENU"
  Options:
     a) Upgrade Energi v2 to v3; automatic wallet migration
@@ -1355,7 +1358,8 @@ ENERGIMENU
 }
 
 _menu_option_upgrade () {
-  echo -e "\\e[0m"
+  echo "${NC}"
+  clear 2> /dev/null
   cat << "ENERGIMENU"
  Options:
     a) Upgrade version of Energi v3
@@ -1367,14 +1371,15 @@ ENERGIMENU
 
 
 _end_instructions () {
-  echo -e "\\e[0m"
-  cat << "ENDINSTALL"
+  echo "${NC}"
+  clear 2> /dev/null
+  echo -e "
  Thank you for your support of Energi! We wish you a successful staking.
  Login as ${USRNAME} and run the following script to start/stop the Node:
     - ${BLUE}start_node.sh${NC}    Use the script to start the Node
     - ${BLUE}stop_node.sh${NC}     Use the script to stop the Node
-  For instructions visit: ${DOC_URL}
-ENDINSTALL
+  For instructions visit: ${DOC_URL}"
+
 }
 
 
