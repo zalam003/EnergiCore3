@@ -7,7 +7,7 @@
 #
 # Desc:   Batch script to download and setup Energi 3.x on Linux. The
 #         script will upgrade an existing installation.
-#
+# 
 # Version:1.0 ZA Initial Script
 #
 : '
@@ -18,12 +18,37 @@ bash -ic "$(wget -4qO- -o- https://raw.githubusercontent.com/energicryptocurrenc
 '
 #####################################################################
 
-#
-# Functions
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+# Global Variables
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
 # Uncomment to debug
 #set -x
+
+# Locations of Repositories and Guide
+API_URL='https://api.github.com/repos/energicryptocurrency/energi3/releases/latest'
+SCRIPT_URL='https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest'
+DOC_URL='https://github.com/energicryptocurrency/energi3/blob/master/README.md'
+
+# Energi v3 Bootstrap Settings
+#export BLK_HASH=gsaqiry3h1ho3nh
+#export BOOTSTRAP_URL="https://www.dropbox.com/s/%BLK_HASH%/blocks_n_chains.tar.gz"
+
+# Set Executables & Configuration
+export ENERGI3_EXE=energi3
+export ENERGI3_CONF=energi3.toml
+
+# Set colors
+BLUE=`tput setaf 4`
+RED=`tput setaf 1`
+GREEN=`tput setaf 2`
+YELLOW=`tput setaf 2`
+NC=`tput sgr0`
+
+
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
+# Functions
+### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
 _os_arch () {
   # Check OS Architecture (32-bit or 64-bit)
@@ -32,10 +57,11 @@ _os_arch () {
   if [ "${OSARCH}" != "x86_64" ]
   then
     echo "${RED}${OSARCH} is not supported${NC}"
+    echo "Please goto our website to check which platforms are supported."
     exit 0
   else
     echo "${GREEN}${OSARCH} is supported${NC}"
-        sleep 0.3
+	sleep 0.3
   fi
 }
 
@@ -47,37 +73,37 @@ _check_user () {
     echo "${RED}*** You need to run the script as ${NC}root${RED}.   ***${NC}"
     echo "${RED}*** Exiting the script. Login as ${NC}root${RED} and ***${NC}"
     echo "${RED}*** run the script again.                  ***${NC}"
-    exit 0
+    exit 0  
   fi
-
+  
   CHKV3USRTMP=/tmp/chk_v3_usr.tmp
   find /home -name energi3.ipc | awk -F\/ '{print $3}' > ${CHKV3USRTMP}
   find /root -name energi3.ipc | awk -F\/ '{print $3}' >> ${CHKV3USRTMP}
   V3USRCOUNT=`wc -l ${CHKV3USRTMP} | awk '{ print $1 }'`
-
+  
   case ${V3USRCOUNT} in
-
+  
     0)
       #
-      # New or Migration
+      # Energiv3 Not Installed
       # ================
-      #
-      # Migration:
-      # if energi.conf and energid exists assume a migration
-      # Check for file: migrated_to_v3.log
       #
       # New:
       # v2 is not installed or already has been mograted
+      # 
+      # Migration:
+      # if energi.conf and energid exists assume a migration
+      # Check for file: migrated_to_v3.log
       #
       echo -n "Checking if Energi v2 is installed:       "
       CHKV2USRTMP=/tmp/chk_v2_usr.tmp
       find /home -name energi.conf | awk -F\/ '{print $3}' > ${CHKV2USRTMP}
       find /root -name energi.conf | awk -F\/ '{print $3}' >> ${CHKV2USRTMP}
       V2USRCOUNT=`wc -l ${CHKV2USRTMP} | awk '{ print $1 }'`
-
+      
       case ${V2USRCOUNT} in
         0)
-          echo "${RED}V2 Not installed${NC}"
+          echo "${YELLOW}V2 Not installed${NC}"
           echo
           # Set username
           USRNAME=nrgstaker
@@ -85,19 +111,26 @@ _check_user () {
           CHKPASSWD=`grep ${USRNAME} /etc/passwd`
           if [ "x${CHKPASSWD}" = "x" ]
           then
-            echo "${RED}*** Creating user ${USRNAME} ***${NC}"
+            echo "${GREEN}*** Creating user ${USRNAME} ***${NC}"
             adduser --gecos "Energi Staking Account" --quiet ${USRNAME}
             usermod -aG sudo ${USRNAME}
           fi
           ;;
-
+        
         *)
-          echo "${RED}V2 is installed${NC}"
+          echo "${GREEN}V2 is installed${NC}"
+          echo
+          echo "You have two options to install Energi v3:"
+          echo "  1) Use the same user as used in Energi v2"
+          echo "  2) Create a separate installation with a new installation"
+          echo
+          echo "For both options you can choose to manually migrate the wallet or automatically"
+          echo "migrate all funds from Energi v2 to Energi v3."
           echo
           isMigrate=""
-          read -p "${BLUE}Do you want to migrate from Energi v2 to v3 (y/N):${NC} "
+          read -p "Do you want to migrate from Energi v2 to v3 (y/N): "
           isMigrate=${isMigrate,,}    # tolower
-
+          
           if [ "${isMigrate}" = "y" ]
           then
             I=1
@@ -113,10 +146,10 @@ _check_user () {
                 break
               fi
             done
-
+            
             REPLY=""
             read -p "${BLUE}Select with user name to migrate:${NC} " REPLY
-
+            
             if [ ${REPLY} -le ${V2USRCOUNT} ]
             then
               # Based on selection, assign from array of USR
@@ -134,7 +167,7 @@ _check_user () {
               echo "${RED}Invalid entry:${NC} Enter a number less than or equal to ${V3USRCOUNT}"
               _check_user
             fi
-
+            
           else
             USRNAME=nrgstaker
             INSTALLTYPE=new
@@ -143,29 +176,32 @@ _check_user () {
             CHKPASSWD=`grep ${USRNAME} /etc/passwd`
             if [ "x${CHKPASSWD}" = "x" ]
             then
-              echo "${RED}*** Creating user ${USRNAME} ***${NC}"
+              echo "${GREEN}*** Creating user ${USRNAME} ***${NC}"
               adduser --gecos "Energi Staking Account" --quiet ${USRNAME}
               usermod -aG sudo ${USRNAME}
             fi
           fi
-
+          
           sleep 3
           ;;
       esac
-
+      
       # Clean-up temporary file
       rm ${CHKV2USRTMP}
       ;;
-
+      
     1)
-      # If one installation, use the username
+      #
+      # Energi v3 has been already installed
+      # Check if a new version needs to be installed
+      # 
       USRNAME=`cat ${CHKV3USRTMP}`
       INSTALLTYPE=upgrade
       echo "${RED}Upgrade:${NC} Energi v3 will be upgraded if required as ${BLUE}${USRNAME}${NC}"
-
+      
       sleep 3
       ;;
-
+  
     *)
       # If more than one username was used to install Energi v3, ask which one to use
       I=1
@@ -183,7 +219,7 @@ _check_user () {
       done
       REPLY=""
       read -p "Select with user name to use: " REPLY
-
+      
       if [ ${REPLY} -le ${V3USRCOUNT} ]
       then
         USRNAME=${USR[${REPLY}]}
@@ -193,19 +229,20 @@ _check_user () {
         echo "               Starting over"
         _check_user
       fi
-
+      
       echo "${RED}Upgrade:${NC} Upgrading Enegi v3 as ${USRNAME}"
-
+      
       sleep 3
       ;;
-
+  
   esac
-
+  
   # Clean-up temporary file
   rm ${CHKV3USRTMP}
-
+  
   # Set Default Install Directory
-  export ENERGI3_HOME=/home/${USRNAME}/energi3
+  export USR_HOME=/home/${USRNAME}
+  export ENERGI3_HOME=${USR_HOME}/energi3
 }
 
 
@@ -224,7 +261,7 @@ _setup_appdir () {
     echo
     CHK_HOME=${CHK_HOME,,}    # tolower
   done
-
+  
   echo "Energi v3 will be installed in ${ENERGI3_HOME}"
   # Set application directories
   export BIN_DIR=${ENERGI3_HOME}/bin
@@ -232,10 +269,6 @@ _setup_appdir () {
   export JS_DIR=${ENERGI3_HOME}/js
   export PW_DIR=${ENERGI3_HOME}/.secure
   export TMP_DIR=${ENERGI3_HOME}/tmp
-
-  # Set Executables & Configuration
-  export ENERGI3_EXE=energi3
-  export ENERGI3_CONF=energi3.toml
 
   # Create directories if it does not exist
   if [ ! -d ${BIN_DIR} ]
@@ -258,10 +291,10 @@ _setup_appdir () {
     echo "Creating directory: ${TMP_DIR}"
     mkdir -p ${TMP_DIR}
   fi
-
+  
   echo "Changing ownership of ${ENERGI3_HOME} to ${USRNAME}"
   chown -R ${USRNAME}:${USRNAME} ${ENERGI3_HOME}
-
+  
 }
 
 _check_ismainnet () {
@@ -284,7 +317,7 @@ _check_ismainnet () {
     export isMainnet=n
     echo "The application will be setup for Testnet"
   fi
-
+  
 }
 
 _install_apt () {
@@ -319,7 +352,7 @@ UBUNTU_SECURITY_PACKAGES
       fi
     fi
   fi
-
+  
   # Install missing programs if needed.
   if [ ! -x "$( command -v aria2c )" ]
   then
@@ -358,10 +391,10 @@ UBUNTU_SECURITY_PACKAGES
       aria2 \
       dbus-user-session
   fi
-
+  
   echo "Removing apt files not required"
   sudo apt autoremove -y
-
+  
 }
 
 _add_logrotate () {
@@ -385,37 +418,33 @@ ENERGI3_LOGROTATE
 
 _install_energi3 () {
 
-  # Location of files
-  API_URL='https://api.github.com/repos/energicryptocurrency/energi3/releases/latest'
-  SCRIPT_URL='https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest'
-
   # Name of scripts
   #NODE_SCRIPT=start_staking.sh
   #MN_SCRIPT=start_mn.sh
   NODE_SCRIPT=run_linux.sh
   MN_SCRIPT=run_mn_linux.sh
   JS_SCRIPT=utils.js
-
-  # Get the latest version from Github
+  
+  # Get the latest version from Github 
   GITHUB_LATEST=`curl -s ${API_URL}`
   BIN_URL=$( echo "${GITHUB_LATEST}" | jq -r '.assets[].browser_download_url' | grep -v debug | grep -v '.sig' | grep linux )
   GIT_VERSION=$( echo "${GITHUB_LATEST}" | jq -r '.tag_name' )
-
+  
   # Extract latest version number without the 'v'
   LASTEST=`echo ${GIT_VERSION} | sed 's/v//g'`
-
+  
   # Download from repositogy
   echo "Downloading Energi Core Node and scripts"
   wget -4qo- "${BIN_URL}" -O "${BIN_DIR}/${ENERGI3_EXE}" --show-progress --progress=bar:force 2>&1
   sleep 0.3
   chmod 755 ${BIN_DIR}/${ENERGI3_EXE}
   chown ${USRNAME}:${USRNAME} ${BIN_DIR}/${ENERGI3_EXE}
-
+  
   wget -4qo- "${SCRIPT_URL}/scripts/${NODE_SCRIPT}?dl=1" -O "${BIN_DIR}/${NODE_SCRIPT}" --show-progress --progress=bar:force 2>&1
   sleep 0.3
   chmod 755 ${BIN_DIR}/${NODE_SCRIPT}
   chown ${USRNAME}:${USRNAME} ${BIN_DIR}/${NODE_SCRIPT}
-
+  
   wget -4qo- "${SCRIPT_URL}/scripts/${MN_SCRIPT}?dl=1" -O "${BIN_DIR}/${MN_SCRIPT}" --show-progress --progress=bar:force 2>&1
   sleep 0.3
   chmod 755 ${BIN_DIR}/${MN_SCRIPT}
@@ -425,13 +454,13 @@ _install_energi3 () {
   sleep 0.3
   chmod 644 ${JS_DIR}/${JS_SCRIPT}
   chown ${USRNAME}:${USRNAME} ${BIN_DIR}/${MN_SCRIPT}
-
+  
 }
 
 
 _restrict_logins() {
   # Secure server by restricting who can login
-
+  
   # Have linux passwords show stars.
   if [[ -f /etc/sudoers ]] && [[ $( sudo grep -c 'env_reset,pwfeedback' /etc/sudoers ) -eq 0 ]]
   then
@@ -488,7 +517,7 @@ _restrict_logins() {
 
 _secure_host() {
   # Enable Local Firewall
-  echo "Limiting access to server"
+  echo "Limiting ssh and ${FWPORT} port access to server"
   ufw allow ssh/tcp
   ufw limit ssh/tcp
   ufw allow ${FWPORT}/tcp
@@ -503,7 +532,7 @@ _setup_two_factor() {
   sudo update-rc.d apache2 remove 2>/dev/null
 
   # Ask to review if .google_authenticator file already exists.
-  if [[ -s "${HOME}/.google_authenticator" ]]
+  if [[ -s "${USR_HOME}/.google_authenticator" ]]
   then
     REPLY=''
     read -p "Review 2 factor authentication code for password SSH login (y/n)?: " -r
@@ -515,9 +544,9 @@ _setup_two_factor() {
   fi
 
   # Clear out an old failed run.
-  if [[ -f "${HOME}/.google_authenticator.temp" ]]
+  if [[ -f "${USR_HOME}/.google_authenticator.temp" ]]
   then
-    rm "${HOME}/.google_authenticator.temp"
+    rm "${USR_HOME}/.google_authenticator.temp"
   fi
 
   # Install google-authenticator if not there.
@@ -544,20 +573,22 @@ _setup_two_factor() {
     sudo update-rc.d apache2 remove 2>/dev/null
   fi
 
-  if [[ -f "${HOME}/masternode/stake/otp.php" ]]
+  if [[ -f "${ETC_DIR}/otp.php" ]]
   then
-    cp "${HOME}/masternode/stake/otp.php" "${HOME}/___otp.php"
+    cp "${ETC_DIR}/otp.php" "${USR_HOME}/___otp.php"
   else
-    wget -4qo- https://raw.githack.com/mikeytown2/masternode/master/stake/otp.php -O "${HOME}/___otp.php"
+    wget -4qo- ${SCRIPT_URL}/otp.php -O "${USR_HOME}/___otp.php" --show-progress --progress=bar:force 2>&1
+    cp "${USR_HOME}/___otp.php" "${ETC_DIR}/otp.php"
+    chown ${USRNAME}:${USRNAME} "${ETC_DIR}/otp.php"
+    chmod 644 "${ETC_DIR}/otp.php"
   fi
 
   # Generate otp.
   IP_ADDRESS=$( timeout --signal=SIGKILL 10s wget -4qO- -T 10 -t 2 -o- http://ipinfo.io/ip )
-  #### USRNAME=$( whoami )
   SECRET=''
-  if [[ -f "${HOME}/.google_authenticator" ]]
+  if [[ -f "${USR_HOME}/.google_authenticator" ]]
   then
-    SECRET=$( sudo head -n 1 "${HOME}/.google_authenticator" 2>/dev/null )
+    SECRET=$( sudo head -n 1 "${USR_HOME}/.google_authenticator" 2>/dev/null )
   fi
   if [[ -z "${SECRET}" ]]
   then
@@ -569,8 +600,8 @@ _setup_two_factor() {
     head -200 /dev/urandom | cksum | tr -d ' ' | cut -c1-8 ;
     head -200 /dev/urandom | cksum | tr -d ' ' | cut -c1-8 ;
     head -200 /dev/urandom | cksum | tr -d ' ' | cut -c1-8 ;
-    } | sudo tee -a  "${HOME}/.google_authenticator" >/dev/null
-    SECRET=$( sudo head -n 1 "${HOME}/.google_authenticator" 2>/dev/null )
+    } | sudo tee -a  "${USR_HOME}/.google_authenticator" >/dev/null
+    SECRET=$( sudo head -n 1 "${USR_HOME}/.google_authenticator" 2>/dev/null )
   fi
   if [[ -z "${SECRET}" ]]
   then
@@ -578,9 +609,10 @@ _setup_two_factor() {
     return
   fi
 
-  mv "${HOME}/.google_authenticator" "${HOME}/.google_authenticator.temp"
+  mv "${USR_HOME}/.google_authenticator" "${USR_HOME}/.google_authenticator.temp"
   CHMOD_G_AUTH=$( stat --format '%a' .google_authenticator.temp )
-  chmod 666 "${HOME}/.google_authenticator.temp"
+  chmod 666 "${USR_HOME}/.google_authenticator.temp"
+  clear
 
   stty sane 2>/dev/null
   echo "Warning: pasting the following URL into your browser exposes the OTP secret to Google:"
@@ -604,13 +636,13 @@ _setup_two_factor() {
     read -p "6 digit verification code (leave blank to disable & delete): " -r
     if [[ -z "${REPLY}" ]]
     then
-      rm -f "${HOME}/.google_authenticator"
-      rm -f "${HOME}/.google_authenticator.temp"
+      rm -f "${USR_HOME}/.google_authenticator"
+      rm -f "${USR_HOME}/.google_authenticator.temp"
       echo "Not going to use google authenticator."
       return
     fi
 
-    KEY_CHECK=$( php "${HOME}/___otp.php" "${REPLY}" "${HOME}/.google_authenticator.temp" )
+    KEY_CHECK=$( php "${USR_HOME}/___otp.php" "${REPLY}" "${USR_HOME}/.google_authenticator.temp" )
     if [[ ! -z "${KEY_CHECK}" ]]
     then
       echo "${KEY_CHECK}"
@@ -621,14 +653,15 @@ _setup_two_factor() {
     fi
   done
 
-  if [[ -f "${HOME}/.google_authenticator.temp" ]]
+  if [[ -f "${USR_HOME}/.google_authenticator.temp" ]]
   then
-    chmod "${CHMOD_G_AUTH}" "${HOME}/.google_authenticator.temp"
-    mv "${HOME}/.google_authenticator.temp" "${HOME}/.google_authenticator"
+    chmod "${CHMOD_G_AUTH}" "${USR_HOME}/.google_authenticator.temp"
+    chown ${USRNAME}:${USRNAME} "${USR_HOME}/.google_authenticator.temp"
+    mv "${USR_HOME}/.google_authenticator.temp" "${USR_HOME}/.google_authenticator"
   fi
 
   echo "Your emergency scratch codes are (write these down in a safe place):"
-  grep -oE "[0-9]{8}" "${HOME}/.google_authenticator" | awk '{print "  " $1 }'
+  grep -oE "[0-9]{8}" "${USR_HOME}/.google_authenticator" | awk '{print "  " $1 }'
 
   read -r -p $'Use this 2 factor code \e[7m(y/n)\e[0m? ' -e 2>&1
   REPLY=${REPLY,,} # tolower
@@ -656,20 +689,20 @@ _setup_two_factor() {
     sleep 5
     clear
   else
-    rm -f "${HOME}/.google_authenticator"
+    rm -f "${USR_HOME}/.google_authenticator"
   fi
 
   # Clean up.
-  if [[ -f "${HOME}/___otp.php" ]]
+  if [[ -f "${USR_HOME}/___otp.php" ]]
   then
-    rm -rf "${HOME}/___otp.php"
+    rm -rf "${USR_HOME}/___otp.php"
   fi
 }
 
 _add_rsa_key() {
   while :
   do
-    TEMP_FILE_NAME1=$( mktemp )
+    TEMP_RSA_FILE=$( mktemp )
     printf "Enter the PUBLIC ssh key (starts with ssh-rsa AAAA) and press [ENTER]:\n\n"
     read -r SSH_RSA_PUBKEY
     if [[ "${#SSH_RSA_PUBKEY}" -lt 10 ]]
@@ -678,19 +711,19 @@ _add_rsa_key() {
       echo
       break
     fi
-    echo "${SSH_RSA_PUBKEY}" >> "${TEMP_FILE_NAME1}"
-    SSH_TEST=$( ssh-keygen -l -f "${TEMP_FILE_NAME1}"  2>/dev/null )
+    echo "${SSH_RSA_PUBKEY}" >> "${TEMP_RSA_FILE}"
+    SSH_TEST=$( ssh-keygen -l -f "${TEMP_RSA_FILE}"  2>/dev/null )
     if [[ "${#SSH_TEST}" -gt 10 ]]
     then
-      touch "${HOME}/.ssh/authorized_keys"
-      chmod 644 "${HOME}/.ssh/authorized_keys"
-      echo "${SSH_RSA_PUBKEY}" >> "${HOME}/.ssh/authorized_keys"
+      touch "${USR_HOME}/.ssh/authorized_keys"
+      chmod 644 "${USR_HOME}/.ssh/authorized_keys"
+      echo "${SSH_RSA_PUBKEY}" >> "${USR_HOME}/.ssh/authorized_keys"
       echo "Added ${SSH_TEST}"
       echo
       break
     fi
 
-    rm "${TEMP_FILE_NAME1}"
+    rm "${TEMP_RSA_FILE}"
   done
 }
 
@@ -740,9 +773,9 @@ _get_node_info() {
   if [ ! -x "$( command -v ffsend )" ]
   then
     FFSEND_URL=$( wget -4qO- -o- https://api.github.com/repos/timvisee/ffsend/releases/latest | jq -r '.assets[].browser_download_url' | grep static | grep linux )
-    mkdir -p "${HOME}/energi3/bin/"
-    wget -4q -o- "${FFSEND_URL}" -O "${HOME}/energi3/bin/ffsend"
-    chmod +x "${HOME}/energi3/bin/ffsend"
+    mkdir -p "${ENERGI3_HOME}/bin/"
+    wget -4q -o- "${FFSEND_URL}" -O "${ENERGI3_HOME}/bin/ffsend"
+    chmod +x "${ENERGI3_HOME}/bin/ffsend"
   fi
 
   # Load in functions.
@@ -751,8 +784,8 @@ _get_node_info() {
   then
     PS1="\\"
   fi
-  cd "${HOME}" || return 1 2>/dev/null
-  source "${HOME}/.bashrc"
+  cd "${USR_HOME}" || return 1 2>/dev/null
+  source "${USR_HOME}/.bashrc"
   if [ "${PS1}" == "\\" ]
   then
     PS1=''
@@ -773,7 +806,7 @@ _get_node_info() {
         if [[ "${REPLY}" == 'y' ]]
         then
           bash -ic "$(wget -4qO- -o- "raw.githubusercontent.com/mikeytown2/masternode/master/${DAEMON_BIN}.sh")" -- NO_MN
-          source "${HOME}/.bashrc"
+          source "${USR_HOME}/.bashrc"
           _get_node_info "${USRNAME}" "${CONF_FILE}" "${DAEMON_BIN}" "${CONTROLLER_BIN}"
         fi
       fi
@@ -874,14 +907,14 @@ _copy_keystore() {
   CONF_DIR=$( dirname "${CONF_FILE}" )
 
   # Update mn script.
-  cd "${HOME}" || exit
+  cd "${USR_HOME}" || exit
   COUNTER=0
-  rm -f "${HOME}/___mn.sh"
-  while [[ ! -f "${HOME}/___mn.sh" ]] || [[ $( grep -Fxc "# End of masternode setup script." "${HOME}/___mn.sh" ) -eq 0 ]]
+  rm -f "${USR_HOME}/___mn.sh"
+  while [[ ! -f "${USR_HOME}/___mn.sh" ]] || [[ $( grep -Fxc "# End of masternode setup script." "${USR_HOME}/___mn.sh" ) -eq 0 ]]
   do
-    rm -f "${HOME}/___mn.sh"
+    rm -f "${USR_HOME}/___mn.sh"
     echo "Downloading Setup Script."
-    wget -4qo- gist.githack.com/mikeytown2/1637d98130ac7dfbfa4d24bac0598107/raw/mcarper.sh -O "${HOME}/___mn.sh"
+    wget -4qo- gist.githack.com/mikeytown2/1637d98130ac7dfbfa4d24bac0598107/raw/mcarper.sh -O "${USR_HOME}/___mn.sh"
     COUNTER=$(( COUNTER + 1 ))
     if [[ "${COUNTER}" -gt 3 ]]
     then
@@ -897,8 +930,8 @@ _copy_keystore() {
     echo "Setup encountered an error; please ask for help."
     return
   fi
-  sed -i "1iDAEMON_BIN='${DAEMON_BIN}'" "${HOME}/___mn.sh"
-  bash "${HOME}/___mn.sh" UPDATE_BASHRC
+  sed -i "1iDAEMON_BIN='${DAEMON_BIN}'" "${USR_HOME}/___mn.sh"
+  bash "${USR_HOME}/___mn.sh" UPDATE_BASHRC
 
   # Load in functions.
   stty sane 2>/dev/null
@@ -906,14 +939,14 @@ _copy_keystore() {
   then
     PS1="\\"
   fi
-  cd "${HOME}" || return 1 2>/dev/null
-  source "${HOME}/.bashrc"
+  cd "${USR_HOME}" || return 1 2>/dev/null
+  source "${USR_HOME}/.bashrc"
   if [ "${PS1}" == "\\" ]
   then
     PS1=''
   fi
   stty sane 2>/dev/null
-  rm "${HOME}/___mn.sh"
+  rm "${USR_HOME}/___mn.sh"
 
   # Wait for wallet to load; start if needed.
   _masternode_dameon_2 "${USRNAME}" "${CONTROLLER_BIN}" '' "${DAEMON_BIN}" "${CONF_FILE}" '' '-1' '-1' wait_for_loaded
@@ -1013,7 +1046,7 @@ _copy_keystore() {
 
   while :
   do
-    TEMP_DIR_NAME1=$( mktemp -d -p "${HOME}" )
+    TEMP_DIR_NAME1=$( mktemp -d -p "${USR_HOME}" )
     if [[ -z "${REPLY}" ]]
     then
       read -p "URL (leave blank to skip): " -r
@@ -1025,9 +1058,9 @@ _copy_keystore() {
 
     # Trim white space.
     REPLY=$( echo "${REPLY}" | xargs )
-    if [[ -f "${HOME}/energi3/bin/ffsend" ]]
+    if [[ -f "${ENERGI3_HOME}/bin/ffsend" ]]
     then
-      "${HOME}/energi3/bin/ffsend" download -y --verbose "${REPLY}" -o "${TEMP_DIR_NAME1}/"
+      "${ENERGI3_HOME}/bin/ffsend" download -y --verbose "${REPLY}" -o "${TEMP_DIR_NAME1}/"
     else
       ffsend download -y --verbose "${REPLY}" -o "${TEMP_DIR_NAME1}/"
     fi
@@ -1071,7 +1104,7 @@ _copy_keystore() {
         _masternode_dameon_2 "${USRNAME}" "${CONTROLLER_BIN}" '' "${DAEMON_BIN}" "${CONF_FILE}" '' '-1' '-1' enable
         # Wait for wallet to load; start if needed.
         _masternode_dameon_2 "${USRNAME}" "${CONTROLLER_BIN}" '' "${DAEMON_BIN}" "${CONF_FILE}" '' '-1' '-1' wait_for_loaded
-        if [[ -f "${HOME}/.pwd/${DATADIR_FILENAME}" ]]
+        if [[ -f "${USR_HOME}/.pwd/${DATADIR_FILENAME}" ]]
         then
           _masternode_dameon_2 "${USRNAME}" "${CONTROLLER_BIN}" '' "${DAEMON_BIN}" "${CONF_FILE}" '' '-1' '-1' unlock_wallet_for_staking
         fi
@@ -1107,7 +1140,7 @@ _copy_keystore() {
   done
   rm -rf "${TEMP_DIR_NAME1:?}"
 
-  rm -f "${HOME}/energi3/.secure/${DATADIR_FILENAME}"
+  rm -f "${ENERGI3_HOME}/.secure/${DATADIR_FILENAME}"
 
 }
 
@@ -1123,7 +1156,7 @@ _setup_keystore_auto_pw () {
   fi
   DATADIR=$( dirname "${CONF_FILE}" )
   DATADIR_FILENAME=$( echo "${DATADIR}" | tr '/' '_' )
-  mkdir -p "${HOME}/energi3/.secure/"
+  mkdir -p "${ENERGI3_HOME}/.secure/"
 
   # Load in functions.
   stty sane 2>/dev/null
@@ -1131,21 +1164,21 @@ _setup_keystore_auto_pw () {
   then
     PS1="\\"
   fi
-  cd "${HOME}" || return 1 2>/dev/null
-  source "${HOME}/.bashrc"
+  cd "${USR_HOME}" || return 1 2>/dev/null
+  source "${USR_HOME}/.bashrc"
   if [ "${PS1}" == "\\" ]
   then
     PS1=''
   fi
   stty sane 2>/dev/null
 
-
+ 
 
   # Wait for wallet to load; start if needed.
-
+  
 
   # Wait for mnsync
-
+  
 
   # Try to unlock the wallet.
   # ==> command
@@ -1156,7 +1189,7 @@ _setup_keystore_auto_pw () {
 
   while [[ "${WALLET_UNLOCKED}" != 'true' ]]
   do
-    rm -f "${HOME}/energi3/.secure/${DATADIR_FILENAME}" 2>/dev/null
+    rm -f "${ENERGI3_HOME}/.secure/${DATADIR_FILENAME}" 2>/dev/null
     unset PASSWORD
     unset CHARCOUNT
     echo -n "Uploaded keystore account file password: "
@@ -1192,9 +1225,9 @@ _setup_keystore_auto_pw () {
     stty echo
 
     echo
-    touch "${HOME}/energi3/.secure/${DATADIR_FILENAME}"
-    chmod 600 "${HOME}/energi3/.secure/${DATADIR_FILENAME}"
-    echo "${PASSWORD}" > "${HOME}/energi3/.secure/${DATADIR_FILENAME}"
+    touch "${ENERGI3_HOME}/.secure/${DATADIR_FILENAME}"
+    chmod 600 "${ENERGI3_HOME}/.secure/${DATADIR_FILENAME}"
+    echo "${PASSWORD}" > "${ENERGI3_HOME}/.secure/${DATADIR_FILENAME}"
 
     # ==> Command to start with unlock password
 
@@ -1290,12 +1323,12 @@ _ascii_logo () {
     /::\  \
    /:/\:\__\
   /:/ /:/ _/_
- /:/ /:/ /\__\  ______ _   _ ______ _____   _____ _____ ____
- \:\ \/ /:/  / |  ____| \ | |  ____|  __ \ / ____|_   _|___ \
+ /:/ /:/ /\__\  ______ _   _ ______ _____   _____ _____ ____  
+ \:\ \/ /:/  / |  ____| \ | |  ____|  __ \ / ____|_   _|___ \ 
   \:\  /:/  /  | |__  |  \| | |__  | |__) | |  __  | |   __) |
-   \:\/:/  /   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ <
+   \:\/:/  /   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ < 
     \::/  /    | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
-     \/__/     |______|_| \_|______|_|  \_\\_____|_____|____/
+     \/__/     |______|_| \_|______|_|  \_\\_____|_____|____/ 
 ENERGI3
 }
 
@@ -1305,7 +1338,7 @@ _menu_option_new () {
  Options:
     a) New server installation of Energi v3
     b) Install monitoring on Discord and/or Telegram
-
+    
     x) Exit without doing anything
 ENERGIMENU
 }
@@ -1316,7 +1349,7 @@ _menu_option_mig () {
  Options:
     a) Upgrade Energi v2 to v3; automatic wallet migration
     b) Upgrade Energi v2 to v3; manual wallet migration
-
+    
     x) Exit without doing anything
 ENERGIMENU
 }
@@ -1327,25 +1360,27 @@ _menu_option_upgrade () {
  Options:
     a) Upgrade version of Energi v3
     b) Install monitoring on Discord and/or Telegram
-
+    
     x) Exit without doing anything
 ENERGIMENU
+}
+
+
+_end_instructions () {
+  echo -e "\\e[0m"
+  cat << "ENDINSTALL"
+ Thank you for your support of Energi! We wish you a successful staking.
+ Login as ${USRNAME} and run the following script to start/stop the Node:
+    - ${BLUE}start_node.sh${NC}    Use the script to start the Node
+    - ${BLUE}stop_node.sh${NC}     Use the script to stop the Node
+  For instructions visit: ${DOC_URL}
+ENDINSTALL
 }
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # Main Program
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-
-# Set colors
-BLUE=`tput setaf 4`
-RED=`tput setaf 1`
-GREEN=`tput setaf 3`
-NC=`tput sgr0`
-
-# Bootstrap Settings
-#export BLK_HASH=gsaqiry3h1ho3nh
-#export BOOTSTRAP_URL="https://www.dropbox.com/s/%BLK_HASH%/blocks_n_chains.tar.gz"
 
 #REPLY=''
 #read -p "Proceed with the script (y/n)?: " -r
@@ -1386,18 +1421,18 @@ case ${INSTALLTYPE} in
     then
       REPLY='h'
     fi
-
+    
     case ${REPLY} in
       a)
         # New server installation of Energi v3
-
+        
         # => Run as root
         _install_apt
         _restrict_logins
         _check_ismainnet
         _secure_host
         _check_clock
-
+        
         REPLY=''
         read -p "Do you want to install 2-Factor Authenticaion [Y/n]?: " -r
         REPLY=${REPLY,,} # tolower
@@ -1405,46 +1440,57 @@ case ${INSTALLTYPE} in
         then
           _setup_two_factor
         fi
-
+        
+        REPLY=''
+        read -p "Do you want to install RSA Key [Y/n]?: " -r
+        REPLY=${REPLY,,} # tolower
+        if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
+        then
+          _add_rsa_key
+        fi
+        
         _add_swap
         _add_logrotate
-
+        
         #sudo -u ${USRNAME} /bin/bash - << DOASUSR
         # => Run as user
         _setup_appdir
         _install_energi3
-
+        
         #_copy_keystore
         #_setup_keystore_auto_pw
-
+        
         #DOASUSR
         ;;
-
+      
       b)
         # Install monitoring on Discord and/or Telegram
         echo "Monitoring functionality to be added"
         ;;
-
+        
       x)
         # Exit - Nothing to do
+        echo
+        echo
+        echo "Nothing to install.  Exiting from the installer."
         exit 0
-
+    
         ;;
-
+  
       h)
-        clear
-        echo "${RED}ERROR: ${NC}Need to select one of the following"
-        _menu_option_new
+        echo
+        echo
+        echo "${RED}ERROR: ${NC}Need to select one of the options to continue..."
         echo
         echo "Restart the installer"
         exit 0
-
+        
         ;;
-
+        
     esac
-
+      
   ;;
-
+  
   upgrade)
     _menu_option_upgrade
     # a) Upgrade version of Energi v3
@@ -1453,7 +1499,7 @@ case ${INSTALLTYPE} in
     REPLY='x'
     read -p "Please select an option to get started (a, b, or x): " -r
     REPLY=${REPLY,,} # tolower
-
+    
     case ${REPLY} in
       a)
         # Upgrade version of Energi v3
@@ -1461,21 +1507,21 @@ case ${INSTALLTYPE} in
         _check_clock
         _setup_two_factor
         _add_swap
-
+        
         ;;
-
+      
       b)
         # Install monitoring on Discord and/or Telegram
         echo "Monitoring functionality to be added"
-
+        
         ;;
-
+        
       x)
         # Exit - Nothing to do
         exit 0
-
+    
         ;;
-
+  
       *)
         clear
         echo "Usage: Please select an option to get started (a, b, c, d or x): "
@@ -1485,9 +1531,9 @@ case ${INSTALLTYPE} in
         exit 0
         ;;
     esac
-
+    
   ;;
-
+  
   migrate)
     _menu_option_mig
     # a) Upgrade Energi v2 to v3; automatic wallet migration
@@ -1496,10 +1542,15 @@ case ${INSTALLTYPE} in
     REPLY='x'
     read -p "Please select an option to get started (a, b, or x): " -r
     REPLY=${REPLY,,} # tolower
-
+    
   ;;
 esac
 
+##
+# End installer
+##
+_ascii_logo
+_end_instructions
 
 
 #rm -rf "${TEMP_FILENAME1}"
