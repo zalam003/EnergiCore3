@@ -60,7 +60,7 @@ _os_arch () {
   then
     echo "${GREEN}supported${NC}"
   else
-    echo "{$RED}not supported${NC}"
+    echo "${RED}not supported${NC}"
     exit 0
   fi
   
@@ -196,8 +196,6 @@ _check_user () {
           
           _add_nrgstaker
           
-            
-          fi
           ;;
         
         *)
