@@ -46,7 +46,6 @@ GREEN=`tput setaf 2`
 YELLOW=`tput setaf 2`
 NC=`tput sgr0`
 
-
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # Functions
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -150,9 +149,9 @@ _add_nrgstaker () {
     echo "${GREEN}*** User ${USRNAME} created and added to sudoer group                       ***${NC}"
     echo "${GREEN}*** User ${USRNAME} will be used to install the software and configurations ***${NC}"
     sleep 3
-    export USRHOME=`grep "^${USRNAME}:" /etc/passwd | awk -F: '{print $6}'`
-    export ENERGI3_HOME=${USRHOME}/energi3
-
+    
+  fi
+  
 }
 
 _check_user () {
@@ -195,6 +194,9 @@ _check_user () {
           INSTALLTYPE=new
           
           _add_nrgstaker
+          
+          export USRHOME=`grep "^${USRNAME}:" /etc/passwd | awk -F: '{print $6}'`
+          export ENERGI3_HOME=${USRHOME}/energi3
           
           ;;
         
@@ -266,6 +268,9 @@ _check_user () {
             echo "Exiting Energi v2 will need to be manually migrated to Energi v3"
             
             _add_nrgstaker
+            
+            export USRHOME=`grep "^${USRNAME}:" /etc/passwd | awk -F: '{print $6}'`
+            export ENERGI3_HOME=${USRHOME}/energi3
             
           fi
           
@@ -489,8 +494,8 @@ UBUNTU_SECURITY_PACKAGES
       dbus-user-session
   fi
   
-  ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq screen
-  ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq nodejs
+  ${SUDO} apt-get install -yq screen
+  ${SUDO} apt-get install -yq nodejs
   
   echo "Removing apt files not required"
   ${SUDO} apt autoremove -y
@@ -1716,9 +1721,10 @@ case ${INSTALLTYPE} in
         then
           # 2FA not installed. Ask if user wants to install
           clear 2> /dev/null
-          echo "2-Factor Authentication (2FA) require you to enter a 6 digit one-time password (OTP) after you"
-          echo "login to the server. You need to install ${GREEN}Google Authenticator${NC} on your mobile to enable the 2FA."
-          echo "The OTP changes every 60 sec. This will secure your server and restrict who can login."
+          echo "2-Factor Authentication (2FA) require you to enter a 6 digit one-time password"
+          echo "(OTP) after you login to the server. You need to install ${GREEN}Google Authenticator${NC}"
+          echo "on your mobile to enable the 2FA. The OTP changes every 60 sec. This will secure"
+          echo "your server and restrict who can login."
           echo
           
           REPLY=''
