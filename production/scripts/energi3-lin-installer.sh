@@ -54,13 +54,13 @@ NC=`tput sgr0`
 _os_arch () {
   # Check Architecture
   OSNAME=`grep ^NAME /etc/os-release | awk -F\" '{ print $2 }'`
-  OSVERSION=`grep ^VERSION_ID /etc/os-release | awk -F\" '{ print $2 }' | awk -F\. '{print $1}'`
-  echo -n "${OSNAME} $OSVERSION} is  "
+  OSVERSION=`grep ^VERSION_ID /etc/os-release | awk -F\" '{ print $2 }' | awk -F\. '{ print $1 }'`
+  echo -n "${OSNAME} ${OSVERSION} is  "
   if [ "${OSNAME}" = "Ubuntu" ] && [ ${OSVERSION} -ge 18 ]
   then
     echo "${GREEN}supported${NC}"
   else
-    echo "$RED}not supported${NC}"
+    echo "{$RED}not supported${NC}"
     exit 0
   fi
   
@@ -91,7 +91,7 @@ _check_runas () {
       SUDO=`sudo`
     else
       echo "User ${RUNAS} does not have sudo permissions."
-      echo "Run ${BLUE}sudo ls -l{{NC} to set permissions if you know the user ${RUNAS} has sudo previlidges"
+      echo "Run ${BLUE}sudo ls -l${NC} to set permissions if you know the user ${RUNAS} has sudo previlidges"
       echo "Exiting script..."
       exit 0
     fi
@@ -103,21 +103,21 @@ _add_nrgstaker () {
   #Check if user nrgstaker exists if not add the user
   CHKPASSWD=`grep ${USRNAME} /etc/passwd`
   
-  if [ "x${CHKPASSWD}" = "x" ]
+  if [ "${CHKPASSWD}" == "" ]
   then
     echo "You can select the computer to generate a ramdom password and let you know what that is."
     echo "Or you can select one for yourself that someone can easily guess."
-    REPLY=""
+    REPLY=''
     read -p "Do you want to select your own password [y]/n: "
     REPLY=${REPLY,,} # tolower
-    if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
+    if [[ "${REPLY}" == "y" ]] || [[ -z "${REPLY}" ]]
     then
       echo "You will be prompted to enter a secure password"
       echo
       ${SUDO} adduser --gecos "Energi Staking Account" --quiet ${USRNAME}
       
     else
-      if [ ! -x "$( command -v  pwgen)" ]
+      if [ ! -x "$( command -v  pwgen )" ]
       then
         echo "Installing missing package to generate random password"
         ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq pwgen
@@ -129,10 +129,10 @@ _add_nrgstaker () {
       echo "  Username: ${BLUE}${USRNAME}${NC}"
       echo "  Password: ${BLUE}${USRPASSWD}${NC}"
       echo
-      REPLY=""
+      REPLY=''
       read -n 1 -p "Did you write down the username and password? y/[n]: "
       REPLY=${REPLY,,} # tolower
-      if [[ "${REPLY}" == 'n' ]] || [[ -z "${REPLY}" ]]
+      if [[ "${REPLY}" == "n" ]] || [[ -z "${REPLY}" ]]
       then
         echo "You need to write down the username and password. Exiting script!"
         exit 0
@@ -338,15 +338,14 @@ _check_user () {
 
 }
 
-
 _setup_appdir () {
 
   CHK_HOME=N
-  while [ ${CHK_HOME} != y ]
+  while [ ${CHK_HOME} != "y" ]
   do
     echo "Enter Full Path of where you wall to install Energi3 Node Software"
     read -r -p "(${ENERGI3_HOME}): " TMP_HOME
-    if [ "x${TMP_HOME}" != "x" ]
+    if [ "${TMP_HOME}" != "" ]
     then
       export ENERGI3_HOME=${TMP_HOME}
     fi
@@ -441,6 +440,7 @@ _install_apt () {
       echo "Running apt-get install unattended-upgrades php ufw."
       sleep 1
       ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq unattended-upgrades php ufw
+      
       if [ ! -f /etc/apt/apt.conf.d/20auto-upgrades ]
       then
         # Enable auto updating of Ubuntu security packages.
@@ -514,7 +514,9 @@ ${CONF_DIR}/*.log {
   missingok
 }
 ENERGI3_LOGROTATE
+
   logrotate -f /etc/logrotate.d/energi3
+  
   fi
 }
 
@@ -558,7 +560,6 @@ _install_energi3 () {
   chown ${USRNAME}:${USRNAME} ${BIN_DIR}/${MN_SCRIPT}
   
 }
-
 
 _restrict_logins() {
   # Secure server by restricting who can login
@@ -619,7 +620,7 @@ _restrict_logins() {
 
 _secure_host() {
   # Enable Local Firewall
-  if [ ! -x "$( command -v  ufw)" ]
+  if [ ! -x "$( command -v  ufw )" ]
   then
     echo "Installing missing package to secure server"
     ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq ufw
@@ -632,6 +633,7 @@ _secure_host() {
   ufw allow ${FWPORT}/udp
   ufw logging on
   ufw enable
+  
 }
 
 _setup_two_factor() {
@@ -849,16 +851,16 @@ _check_clock() {
 }
 
 _add_swap () {
-  # Add 4GB additional swap
+  # Add 2GB additional swap
   if [ ! /var/swapfile ]
   then
-    fallocate -l 4G /var/swapfile
+    fallocate -l 2G /var/swapfile
     chmod 600 /var/swapfile
     mkswap /var/swapfile
     swapon /var/swapfile
 
     echo "/var/swapfile none swap sw 0 0" >> /etc/fstab
-    echo "Added 4GB swap space to the server"
+    echo "Added 2GB swap space to the server"
   else
     echo "No additional swap space added"
   fi
@@ -1010,8 +1012,10 @@ _get_node_info() {
 }
 
 _migrate_wallet () {
+
   V2WALLET_BALANCE=$( energi-cli getbalance )
-  if [[ "${V2WALLET_BALANCE}" = 0 ]]
+  
+  if [[ "${V2WALLET_BALANCE}" == 0 ]]
   then
     echo "Current balance of the Energi v2 wallet on this computer is ${V2WALLET_BALANCE} NRG"
     echo "Nothing to to migrate to Energi v3.  Continuing..."
@@ -1021,9 +1025,7 @@ _migrate_wallet () {
     
   fi
 
-
 }
-
 
 _copy_keystore() {
   V2WALLET_BALANCE=$( energi-cli getbalance )
