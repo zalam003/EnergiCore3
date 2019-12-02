@@ -532,6 +532,14 @@ _install_energi3 () {
   MN_SCRIPT=run_mn_linux.sh
   JS_SCRIPT=utils.js
   
+  # Check Github for URL of latest version
+  if [ -z "${GITHUB_LATEST}" ]
+  then
+    GITHUB_LATEST=`curl -s ${API_URL}`
+  fi
+  BIN_URL=$( echo "${GITHUB_LATEST}" | jq -r '.assets[].browser_download_url' | grep -v debug | grep -v '.sig' | grep linux )
+  
+ 
   # Download from repositogy
   echo "Downloading Energi Core Node and scripts"
   wget -4qo- "${BIN_URL}" -O "${BIN_DIR}/${ENERGI3_EXE}" --show-progress --progress=bar:force 2>&1
@@ -556,29 +564,34 @@ _install_energi3 () {
   
 }
 
+_version_gt() { 
+  # Check if FIRST is greater than SECOND
+  test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; 
+  
+}
+
 _upgrade_energi3 () {
 
   # Get the latest version from Github 
   GITHUB_LATEST=`curl -s ${API_URL}`
-  BIN_URL=$( echo "${GITHUB_LATEST}" | jq -r '.assets[].browser_download_url' | grep -v debug | grep -v '.sig' | grep linux )
   GIT_VERSION=$( echo "${GITHUB_LATEST}" | jq -r '.tag_name' )
   
   # Extract latest version number without the 'v'
   GIT_LATEST=`echo ${GIT_VERSION} | sed 's/v//g'`
   
   # Installed Version
-  INSTALL_VERSION=`${ENERGI3_HOME}/bin/energi3 version | grep "^Version" | awk '{ print $2 }' | awk -F\- '{ print $1 }'`
+  INSTALL_VERSION=`${BIN_DIR}/${ENERGI3_EXE} version | grep "^Version" | awk '{ print $2 }' | awk -F\- '{ print $1 }'`
   
   echo "Current Installed Version: ${INSTALL_VERSION}"
   echo "Latest Version in GitHub:  ${GIT_LATEST}"
   
-  if [ ${INSTALL_VERSION} -lt ${{GIT_LATEST} ]
-  then
+  if version_gt ${GIT_LATEST} ${INSTALL_VERSION}; then
+    echo "Installing newer version ${GIT_VERSION} from Github"
     _install_energi3
   else
-    echo "Latest version of Energi v3 is installed: ${GIT_VERSION}"
+    echo "Latest version of Energi v3 is installed: ${INSTALL_VERSION}"
+    sleep 3
   fi
-  
 
 }
 
@@ -1628,7 +1641,7 @@ case ${INSTALLTYPE} in
         _stop_energi3
         _install_apt
         _restrict_logins
-        #_check_ismainnet
+        _check_ismainnet
         _secure_host
         _check_clock
         _add_swap
@@ -1731,6 +1744,7 @@ case ${INSTALLTYPE} in
         # Install packages
         _install_apt
         _restrict_logins
+        _check_ismainnet
         _secure_host
         _check_clock
         _add_swap
