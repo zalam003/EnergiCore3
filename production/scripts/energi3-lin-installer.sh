@@ -104,8 +104,8 @@ _add_nrgstaker () {
   
   if [ "${CHKPASSWD}" == "" ]
   then
-    echo "You can select the computer to generate a ramdom password and let you know what that is."
-    echo "Or you can select one for yourself that someone can easily guess."
+    echo "You can select the computer to generate a ramdom password and let you know what"
+    echo "that is. Or you can select one for yourself that someone can easily guess."
     REPLY=''
     read -p "Do you want to select your own password [y]/n: "
     REPLY=${REPLY,,} # tolower
@@ -122,7 +122,7 @@ _add_nrgstaker () {
         ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq pwgen
       fi
       
-      USRPASSWD=`pwgen 14 1`
+      USRPASSWD=`pwgen 8 1`
       echo
       echo "Write down the following before continuing:"
       echo "  Username: ${BLUE}${USRNAME}${NC}"
@@ -137,7 +137,8 @@ _add_nrgstaker () {
         exit 0
       fi
       
-      ${SUDO} useradd -m -c "Energi Staking Account" -p ${USRPASSWD} -s /bin/bash ${USRNAME}
+      ${SUDO} adduser --gecos "Energi Staking Account" --disabled-password --quiet ${USRNAME}
+      echo ${USRPASSWD} | ${SUDO} passwd ${USRNAME} --stdin
         
     fi
 
@@ -177,7 +178,7 @@ _check_user () {
       # if energi.conf and energid exists assume a migration
       # Check for file: migrated_to_v3.log
       #
-      echo -n "Checking if Energi v2 is installed:       "
+      echo -n "Checking if Energi v2 is installed: "
       CHKV2USRTMP=/tmp/chk_v2_usr.tmp
       ${SUDO} find /home -name energi.conf | awk -F\/ '{print $3}' > ${CHKV2USRTMP}
       ${SUDO} find /root -name energi.conf | awk -F\/ '{print $3}' >> ${CHKV2USRTMP}
@@ -186,7 +187,7 @@ _check_user () {
       case ${V2USRCOUNT} in
         0)
           # Energi v2 not installed
-          echo "${YELLOW}V2 Not installed${NC}"
+          echo "${YELLOW}Not installed${NC}"
           echo
 
           # Set username
@@ -202,7 +203,7 @@ _check_user () {
         
         *)
           # Energi v2 is installed
-          echo "${GREEN}Energi v2 is installed on this computer${NC}"
+          echo "${GREEN}Installed${NC}"
           echo
           echo "You have two options to install Energi v3:"
           echo "  1) Use the same user as used in Energi v2"
@@ -265,7 +266,7 @@ _check_user () {
             USRNAME=nrgstaker
             INSTALLTYPE=new
             echo "Installing new version of Energi v3 as ${USRNAME}"
-            echo "Exiting Energi v2 will need to be manually migrated to Energi v3"
+            echo "Existing Energi v2 needs to be manually migrated to Energi v3"
             
             _add_nrgstaker
             
@@ -273,9 +274,7 @@ _check_user () {
             export ENERGI3_HOME=${USRHOME}/energi3
             
           fi
-          
-          sleep 3
-          
+               
           ;;
       esac
       
@@ -420,6 +419,7 @@ _stop_energi3 () {
   if [ ! -z "${ENERGI3PID}" ]
   then
     echo "Stopping Energi v3"
+    sleep 3
   fi
 }
 
@@ -532,14 +532,6 @@ _install_energi3 () {
   MN_SCRIPT=run_mn_linux.sh
   JS_SCRIPT=utils.js
   
-  # Get the latest version from Github 
-  GITHUB_LATEST=`curl -s ${API_URL}`
-  BIN_URL=$( echo "${GITHUB_LATEST}" | jq -r '.assets[].browser_download_url' | grep -v debug | grep -v '.sig' | grep linux )
-  GIT_VERSION=$( echo "${GITHUB_LATEST}" | jq -r '.tag_name' )
-  
-  # Extract latest version number without the 'v'
-  LASTEST=`echo ${GIT_VERSION} | sed 's/v//g'`
-  
   # Download from repositogy
   echo "Downloading Energi Core Node and scripts"
   wget -4qo- "${BIN_URL}" -O "${BIN_DIR}/${ENERGI3_EXE}" --show-progress --progress=bar:force 2>&1
@@ -560,8 +552,34 @@ _install_energi3 () {
   wget -4qo- "${SCRIPT_URL}/js/${JS_SCRIPT}?dl=1" -O "${JS_DIR}/${JS_SCRIPT}" --show-progress --progress=bar:force 2>&1
   sleep 0.3
   chmod 644 ${JS_DIR}/${JS_SCRIPT}
-  chown ${USRNAME}:${USRNAME} ${BIN_DIR}/${MN_SCRIPT}
+  chown ${USRNAME}:${USRNAME} ${BIN_DIR}/${JS_SCRIPT}
   
+}
+
+_upgrade_energi3 () {
+
+  # Get the latest version from Github 
+  GITHUB_LATEST=`curl -s ${API_URL}`
+  BIN_URL=$( echo "${GITHUB_LATEST}" | jq -r '.assets[].browser_download_url' | grep -v debug | grep -v '.sig' | grep linux )
+  GIT_VERSION=$( echo "${GITHUB_LATEST}" | jq -r '.tag_name' )
+  
+  # Extract latest version number without the 'v'
+  GIT_LATEST=`echo ${GIT_VERSION} | sed 's/v//g'`
+  
+  # Installed Version
+  INSTALL_VERSION=`${ENERGI3_HOME}/bin/energi3 version | grep "^Version" | awk '{ print $2 }' | awk -F\- '{ print $1 }'`
+  
+  echo "Current Installed Version: ${INSTALL_VERSION}"
+  echo "Latest Version in GitHub:  ${GIT_LATEST}"
+  
+  if [ ${INSTALL_VERSION} -lt ${{GIT_LATEST} ]
+  then
+    _install_energi3
+  else
+    echo "Latest version of Energi v3 is installed: ${GIT_VERSION}"
+  fi
+  
+
 }
 
 _restrict_logins() {
@@ -1434,8 +1452,7 @@ ENERGIMENU
 
 _welcome_instructions () {
   echo "${NC}"
-  echo -e "
- Welcome to the Energi v3 Installer. You can use this script to:
+  echo -e "Welcome to the Energi v3 Installer. You can use this script to:
  - ${BLUE}New Installation :${NC} No previous version of Energi exists on the computer
  - ${BLUE}Upgrade          :${NC} Upgrade from a previous version of Energi
  - ${BLUE}Migrate          :${NC} Migrate from Energi v2 to Energi v3"
@@ -1444,13 +1461,12 @@ _welcome_instructions () {
 
 _end_instructions () {
   echo "${NC}"
-  echo -e "
- Thank you for your support of Energi! We wish you a successful staking.
+  echo -e "Thank you for your support of Energi! We wish you a successful staking.
  Login as ${USRNAME} and run the following script to start/stop the Node:
     - ${BLUE}start_node.sh${NC}    Use the script to start the Node
     - ${BLUE}stop_node.sh${NC}     Use the script to stop the Node
-  For instructions visit:
-  ${DOC_URL}"
+ For instructions visit:
+ ${DOC_URL}"
 echo
 }
 
@@ -1650,7 +1666,7 @@ case ${INSTALLTYPE} in
         # ==> Run as user <==
         #
         _setup_appdir
-        _install_energi3
+        _upgrade_energi3
         
         #_setup_keystore_auto_pw
         
