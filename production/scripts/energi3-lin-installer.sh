@@ -1451,6 +1451,7 @@ _end_instructions () {
     - ${BLUE}stop_node.sh${NC}     Use the script to stop the Node
   For instructions visit:
   ${DOC_URL}"
+echo
 }
 
 
@@ -1518,9 +1519,10 @@ case ${INSTALLTYPE} in
         
         # Check if user wants to install 2FA
         clear 2> /dev/null
-        echo "2-Factor Authentication (2FA) require you to enter a 6 digit one-time password (OTP) after you"
-        echo "login to the server. You need to install ${GREEN}Google Authenticator${NC} on your mobile to enable the 2FA."
-        echo "The OTP changes every 60 sec. This will secure your server and restrict who can login."
+        echo "2-Factor Authentication (2FA) require you to enter a 6 digit one-time password"
+        echo "(OTP) after you login to the server. You need to install ${GREEN}Google Authenticator${NC}"
+        echo "on your mobile to enable the 2FA. The OTP changes every 60 sec. This will secure"
+        echo "your server and restrict who can login."
         echo
         
         REPLY=''
@@ -1620,9 +1622,10 @@ case ${INSTALLTYPE} in
         then
           # 2FA not installed. Ask if user wants to install
           clear 2> /dev/null
-          echo "2-Factor Authentication (2FA) require you to enter a 6 digit one-time password (OTP) after you"
-          echo "login to the server. You need to install ${GREEN}Google Authenticator${NC} on your mobile to enable the 2FA."
-          echo "The OTP changes every 60 sec. This will secure your server and restrict who can login."
+          echo "2-Factor Authentication (2FA) require you to enter a 6 digit one-time password"
+          echo "(OTP) after you login to the server. You need to install ${GREEN}Google Authenticator${NC}"
+          echo "on your mobile to enable the 2FA. The OTP changes every 60 sec. This will secure"
+          echo "your server and restrict who can login."
           echo
           
           REPLY=''
