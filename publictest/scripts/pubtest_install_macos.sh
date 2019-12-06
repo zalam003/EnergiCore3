@@ -13,9 +13,9 @@
 
 ###===> Update if needed
 # Set Previos version to save a copy
-OLD_VERSION=0.5.5
+OLD_VERSION=0.5.7
 # Set version to install
-VERSION=0.5.7
+VERSION=0.5.9
 
 # Check OS
 if [ `uname` == "Darwin" ]
