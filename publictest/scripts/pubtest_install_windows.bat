@@ -86,7 +86,8 @@ exit /b
   @echo Downloading application...
   TIMEOUT /T 9
   
-  bitsadmin /RESET /ALLUSERS
+  :: bitsadmin /RESET /ALLUSERS
+  bitsadmin /RESET
   
   @echo Downloading Public Test Energi Core Node
   bitsadmin /transfer DLPubTestNode /download /priority foreground "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%VERSION%/energi3-windows-4.0-amd64.exe" "%INSTALL_DIR%\bin\energi3.exe"
