@@ -90,19 +90,19 @@ exit /b
   bitsadmin /RESET
   
   @echo Downloading Public Test Energi Core Node
-  ::bitsadmin /transfer DLPubTestNode /download /priority foreground "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%VERSION%/energi3-windows-4.0-amd64.exe" "%INSTALL_DIR%\bin\energi3.exe"
+  bitsadmin /transfer DLPubTestNode /download /priority foreground "https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/%VERSION%/energi3-windows-4.0-amd64.exe" "%INSTALL_DIR%\bin\energi3.exe"
   
   @echo Downloading staking batch script
-  ::bitsadmin /transfer DLInstStakeScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat" "%INSTALL_DIR%\bin\run_windows.bat"
   curl -s "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat" > "%INSTALL_DIR%\bin\run_windows.bat"
+  
   @echo Downloading masternode batch script
-  bitsadmin /transfer DLInstMnScript /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_windows.bat" "%INSTALL_DIR%\bin\run_mn_windows.bat"
+  curl -s "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_windows.bat" > "%INSTALL_DIR%\bin\run_mn_windows.bat"
   
   @echo Downloading passwd.txt file
-  bitsadmin /transfer DLInstPasswd /download /priority foreground "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/passwd.txt" "%INSTALL_DIR%\bin\passwd.txt"
+  curl -s "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/passwd.txt" > "%INSTALL_DIR%\bin\passwd.txt"
   
   @echo Downloading utils.js JavaScript file
-  bitsadmin /transfer DLInstUtilJs /download /priority foreground "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js" "%INSTALL_DIR%\js\passwd.txt"
+  curl -s "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js" > "%INSTALL_DIR%\js\passwd.txt"
   
   cd %INSTALL_DIR%\bin
   
