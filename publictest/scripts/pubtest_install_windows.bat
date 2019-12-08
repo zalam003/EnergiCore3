@@ -102,7 +102,7 @@ exit /b
   curl -s "https://raw.githack.com/zalam003/EnergiCore3/master/publictest/scripts/passwd.txt" > "%INSTALL_DIR%\bin\passwd.txt"
   
   @echo Downloading utils.js JavaScript file
-  curl -s "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js" > "%INSTALL_DIR%\js\passwd.txt"
+  curl -s "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/js/utils.js" > "%INSTALL_DIR%\js\utils.js"
   
   cd %INSTALL_DIR%\bin
   
