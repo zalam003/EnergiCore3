@@ -8,7 +8,7 @@
 :: run_windows.bat
 ::####################################################################
 
-set "VERSION=0.5.5"
+set "VERSION=0.6.0"
 
 set "BIN_DIR=C:\energi3\bin"
 set "DATA_DIR=EnergiCore3\testnet\energi3"
