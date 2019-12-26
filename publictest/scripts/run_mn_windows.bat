@@ -8,7 +8,7 @@
 :: Run script:  run_mn_windows.bat
 ::####################################################################
 
-set "VERSION=0.5.7"
+set "VERSION=0.6.0"
 
 :: energi3.exe version >version.tmp
 :: findstr /B Version version.tmp
