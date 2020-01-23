@@ -109,6 +109,12 @@ done
 # Uncomment to debug
 #set -x
 
+# Check if we have enough memory
+if [[ $(free -m | awk '/^Mem:/{print $2}') -lt 850 ]]; then
+  echo "This installation requires at least 1GB of RAM.";
+  exit 1
+fi
+
 # Locations of Repositories and Guide
 API_URL='https://api.github.com/repos/energicryptocurrency/energi3/releases/latest'
 SCRIPT_URL='https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts'
