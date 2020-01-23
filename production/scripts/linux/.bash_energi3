@@ -1,0 +1,17 @@
+# ~/.bash_energi3: executed by bash(1) for non-login shells.
+# The file is called by ~/.bashrc
+#
+# Add following to the bottom of ~/.bashrc
+#
+# if [ -f ~/.bash_energi3 ]; then
+    . ~/.bash_energi3
+fi
+
+
+
+# Add Energi3 specific PATH
+export PATH=$PATH:$HOME/energi3/bin
+
+# Temporarily suspend bash_history on session for security
+unset HISTFILE
+
