@@ -14,7 +14,7 @@
 # Set Previos version to save a copy
 OLD_VERSION=0.5.9
 # Set version to install
-VERSION=0.6.0
+VERSION=0.7.1
 
 # Check OS
 if [ `uname` == "Linux" ]
