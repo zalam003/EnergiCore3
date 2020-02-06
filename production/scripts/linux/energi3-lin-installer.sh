@@ -118,7 +118,7 @@ fi
 # Locations of Repositories and Guide
 API_URL='https://api.github.com/repos/energicryptocurrency/energi3/releases/latest'
 SCRIPT_URL='https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts'
-DOC_URL='https://github.com/energicryptocurrency/energi3/blob/master/README.md'
+DOC_URL='https://energi.gitbook.io'
 #GITURL=https://raw.githubusercontent.com/energicryptocurrency/energi3
 
 # Energi v3 Bootstrap Settings
@@ -126,8 +126,8 @@ DOC_URL='https://github.com/energicryptocurrency/energi3/blob/master/README.md'
 #export BOOTSTRAP_URL="https://www.dropbox.com/s/%BLK_HASH%/blocks_n_chains.tar.gz"
 
 # Snapshot Block (need to update)
-MAINNETSSBLOCK=956550
-TESTNETSSBLOCK=576357
+MAINNETSSBLOCK=1500000
+TESTNETSSBLOCK=1500000
 
 # Set Executables & Configuration
 export ENERGI3_EXE=energi3
@@ -236,7 +236,8 @@ _add_nrgstaker () {
       REPLY=${REPLY,,} # tolower
       if [[ "${REPLY}" == "n" ]] || [[ -z "${REPLY}" ]]
       then
-        echo "You need to write down the username and password. Exiting script!"
+        echo "Please write down the username and password before continuing"
+        echo "Exiting script!"
         exit 0
       fi
       
@@ -1419,56 +1420,268 @@ ENERGI3
 echo -n ${NC}
 }
 
-_menu_option_new () {
-  echo "${NC}"
-  cat << "ENERGIMENU"
- Options:
-    a) New server installation of Energi v3
-
-
-    x) Exit without doing anything
-ENERGIMENU
+_ascii_logo_top () {
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___
+     /\  \
+    /::\  \
+   /:/\:\__\
+  /:/ /:/ _/_
+ /:/ /:/ /\__\  ______ _   _ ______ _____   _____ _____ ____  
+ \:\ \/ /:/  / |  ____| \ | |  ____|  __ \ / ____|_   _|___ \ 
+  \:\  /:/  /  | |__  |  \| | |__  | |__) | |  __  | |   __) |
+   \:\/:/  /   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ < 
+    \::/  /    | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+     \/__/     |______|_| \_|______|_|  \_\\_____|_____|____/ 
+ENERGI3
+echo -n ${NC}
 }
+
+_ascii_logo_2 () {
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___
+     /\  \
+    /::\  \
+   /:/\:\__\
+  /:/ /:/ _/_   ______ _   _ ______ _____   _____ _____ ____  
+ /:/ /:/ /\__\ |  ____| \ | |  ____|  __ \ / ____|_   _|___ \ 
+ \:\ \/ /:/  / | |__  |  \| | |__  | |__) | |  __  | |   __) |
+  \:\  /:/  /  |  __| | . ` |  __| |  _  /| | |_ | | |  |__ < 
+   \:\/:/  /   | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+    \::/  /    |______|_| \_|______|_|  \_\\_____|_____|____/ 
+     \/__/     
+ENERGI3
+echo -n ${NC}
+}
+
+_ascii_logo_3 () {
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___
+     /\  \
+    /::\  \
+   /:/\:\__\    ______ _   _ ______ _____   _____ _____ ____  
+  /:/ /:/ _/_  |  ____| \ | |  ____|  __ \ / ____|_   _|___ \ 
+ /:/ /:/ /\__\ | |__  |  \| | |__  | |__) | |  __  | |   __) |
+ \:\ \/ /:/  / |  __| | . ` |  __| |  _  /| | |_ | | |  |__ < 
+  \:\  /:/  /  | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+   \:\/:/  /   |______|_| \_|______|_|  \_\\_____|_____|____/ 
+    \::/  /    
+     \/__/     
+ENERGI3
+echo -n ${NC}
+}
+
+_ascii_logo_4 () {
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___
+     /\  \
+    /::\  \     ______ _   _ ______ _____   _____ _____ ____  
+   /:/\:\__\   |  ____| \ | |  ____|  __ \ / ____|_   _|___ \ 
+  /:/ /:/ _/_  | |__  |  \| | |__  | |__) | |  __  | |   __) |
+ /:/ /:/ /\__\ |  __| | . ` |  __| |  _  /| | |_ | | |  |__ < 
+ \:\ \/ /:/  / | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+  \:\  /:/  /  |______|_| \_|______|_|  \_\\_____|_____|____/ 
+   \:\/:/  /   
+    \::/  /    
+     \/__/     
+ENERGI3
+echo -n ${NC}
+}
+
+_ascii_logo_5 () {
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___
+     /\  \      ______ _   _ ______ _____   _____ _____ ____  
+    /::\  \    |  ____| \ | |  ____|  __ \ / ____|_   _|___ \ 
+   /:/\:\__\   | |__  |  \| | |__  | |__) | |  __  | |   __) |
+  /:/ /:/ _/_  |  __| | . ` |  __| |  _  /| | |_ | | |  |__ < 
+ /:/ /:/ /\__\ | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+ \:\ \/ /:/  / |______|_| \_|______|_|  \_\\_____|_____|____/ 
+  \:\  /:/  /  
+   \:\/:/  /   
+    \::/  /    
+     \/__/     
+ENERGI3
+echo -n ${NC}
+}
+
+_ascii_logo_bottom () {
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___       ______ _   _ ______ _____   _____ _____ ____  
+     /\  \     |  ____| \ | |  ____|  __ \ / ____|_   _|___ \ 
+    /::\  \    | |__  |  \| | |__  | |__) | |  __  | |   __) |
+   /:/\:\__\   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ < 
+  /:/ /:/ _/_  | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+ /:/ /:/ /\__\ |______|_| \_|______|_|  \_\\_____|_____|____/ 
+ \:\ \/ /:/  / 
+  \:\  /:/  /  
+   \:\/:/  /   
+    \::/  /    
+     \/__/     
+ENERGI3
+echo -n ${NC}
+}
+
+#_menu_option_new () {
+#  echo "${NC}"
+#  cat << "ENERGIMENU"
+# Options:
+#    a) New server installation of Energi v3
+#
+#
+#    x) Exit without doing anything
+#ENERGIMENU
+#}
+
+_menu_option_new () {
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___       ______ _   _ ______ _____   _____ _____ ____
+     /\  \     |  ____| \ | |  ____|  __ \ / ____|_   _|___ \
+    /::\  \    | |__  |  \| | |__  | |__) | |  __  | |   __) |
+   /:/\:\__\   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ <
+  /:/ /:/ _/_  | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+ /:/ /:/ /\__\ |______|_| \_|______|_|  \_\\_____|_____|____/
+ \:\ \/ /:/  /
+ENERGI3
+echo "${GREEN}  \:\  /:/  /  ${NC}Options:"
+echo "${GREEN}   \:\/:/  /   ${NC}   a) New server installation of Energi v3"
+echo "${GREEN}    \::/  /    ${NC}"
+echo "${GREEN}     \/__/     ${NC}   x) Exit without doing anything"
+echo ${NC}
+}
+
+#_menu_option_mig () {
+#  echo "${NC}"
+#  cat << "ENERGIMENU"
+# Options:
+#    a) Upgrade Energi v2 to v3; automatic wallet migration
+#    b) Upgrade Energi v2 to v3; manual wallet migration
+#    
+#    x) Exit without doing anything
+#ENERGIMENU
+#}
 
 _menu_option_mig () {
-  echo "${NC}"
-  cat << "ENERGIMENU"
- Options:
-    a) Upgrade Energi v2 to v3; automatic wallet migration
-    b) Upgrade Energi v2 to v3; manual wallet migration
-    
-    x) Exit without doing anything
-ENERGIMENU
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___       ______ _   _ ______ _____   _____ _____ ____
+     /\  \     |  ____| \ | |  ____|  __ \ / ____|_   _|___ \
+    /::\  \    | |__  |  \| | |__  | |__) | |  __  | |   __) |
+   /:/\:\__\   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ <
+  /:/ /:/ _/_  | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+ /:/ /:/ /\__\ |______|_| \_|______|_|  \_\\_____|_____|____/
+ \:\ \/ /:/  /
+ENERGI3
+echo "${GREEN}  \:\  /:/  /  ${NC}Options:"
+echo "${GREEN}   \:\/:/  /   ${NC}   a) Upgrade Energi v2 to v3; automatic wallet migration"
+echo "${GREEN}    \::/  /    ${NC}   b) Upgrade Energi v2 to v3; manual wallet migration"
+echo "${GREEN}     \/__/     ${NC}   x) Exit without doing anything"
+echo ${NC}
 }
+
+#_menu_option_upgrade () {
+#  echo "${NC}"
+#  cat << "ENERGIMENU"
+# Options:
+#    a) Upgrade version of Energi v3
+#    b) Install monitoring on Discord and/or Telegram
+#    
+#    x) Exit without doing anything
+#ENERGIMENU
+#}
 
 _menu_option_upgrade () {
-  echo "${NC}"
-  cat << "ENERGIMENU"
- Options:
-    a) Upgrade version of Energi v3
-    b) Install monitoring on Discord and/or Telegram
-    
-    x) Exit without doing anything
-ENERGIMENU
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___       ______ _   _ ______ _____   _____ _____ ____
+     /\  \     |  ____| \ | |  ____|  __ \ / ____|_   _|___ \
+    /::\  \    | |__  |  \| | |__  | |__) | |  __  | |   __) |
+   /:/\:\__\   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ <
+  /:/ /:/ _/_  | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+ /:/ /:/ /\__\ |______|_| \_|______|_|  \_\\_____|_____|____/
+ \:\ \/ /:/  /
+ENERGI3
+echo "${GREEN}  \:\  /:/  /  ${NC}Options:"
+echo "${GREEN}   \:\/:/  /   ${NC}   a) Upgrade version of Energi v3"
+echo "${GREEN}    \::/  /    ${NC}"
+echo "${GREEN}     \/__/     ${NC}   x) Exit without doing anything"
+echo ${NC}
 }
+
+#_welcome_instructions () {
+#  echo "${NC}"
+#  echo -e "Welcome to the Energi v3 Installer. You can use this script to:
+# - ${BLUE}New Installation :${NC} No previous version of Energi exists on the computer
+# - ${BLUE}Upgrade          :${NC} Upgrade from a previous version of Energi
+# - ${BLUE}Migrate          :${NC} Migrate from Energi v2 to Energi v3"
+#  read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
+#}
 
 _welcome_instructions () {
-  echo "${NC}"
-  echo -e "Welcome to the Energi v3 Installer. You can use this script to:
- - ${BLUE}New Installation :${NC} No previous version of Energi exists on the computer
- - ${BLUE}Upgrade          :${NC} Upgrade from a previous version of Energi
- - ${BLUE}Migrate          :${NC} Migrate from Energi v2 to Energi v3"
-  read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___       ______ _   _ ______ _____   _____ _____ ____
+     /\  \     |  ____| \ | |  ____|  __ \ / ____|_   _|___ \
+    /::\  \    | |__  |  \| | |__  | |__) | |  __  | |   __) |
+   /:/\:\__\   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ <
+  /:/ /:/ _/_  | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+ /:/ /:/ /\__\ |______|_| \_|______|_|  \_\\_____|_____|____/
+ \:\ \/ /:/  /
+ENERGI3
+echo "${GREEN}  \:\  /:/  /  ${NC}Welcome to the Energi v3 Installer."
+echo "${GREEN}   \:\/:/  /   ${NC}- New Install : No previous installs"
+echo "${GREEN}    \::/  /    ${NC}- Upgrade     : Upgrade previous version"
+echo "${GREEN}     \/__/     ${NC}- Migrate     : Migrate from Energi v2"
+echo ${NC}
+read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
 }
 
+#_end_instructions () {
+#  echo "${NC}"
+#  echo -e "Thank you for your support of Energi! We wish you a successful staking.
+# Login as ${USRNAME} and run the following script to start/stop the Node:
+#    - ${BLUE}start_node.sh${NC}    Use the script to start the Node
+#    - ${BLUE}stop_node.sh${NC}     Use the script to stop the Node
+# For instructions visit:
+# ${DOC_URL}"
+#echo
+#}
+
 _end_instructions () {
-  echo "${NC}"
-  echo -e "Thank you for your support of Energi! We wish you a successful staking.
- Login as ${USRNAME} and run the following script to start/stop the Node:
-    - ${BLUE}start_node.sh${NC}    Use the script to start the Node
-    - ${BLUE}stop_node.sh${NC}     Use the script to stop the Node
- For instructions visit:
- ${DOC_URL}"
+  echo "${GREEN}"
+  clear 2> /dev/null
+  cat << "ENERGI3"
+      ___       ______ _   _ ______ _____   _____ _____ ____
+     /\  \     |  ____| \ | |  ____|  __ \ / ____|_   _|___ \
+    /::\  \    | |__  |  \| | |__  | |__) | |  __  | |   __) |
+   /:/\:\__\   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ <
+  /:/ /:/ _/_  | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+ /:/ /:/ /\__\ |______|_| \_|______|_|  \_\\_____|_____|____/
+ \:\ \/ /:/  /
+ENERGI3
+echo "${GREEN}  \:\  /:/  /  ${NC}Thank you for supporting Energi! Good luck staking."
+echo "${GREEN}   \:\/:/  /   ${NC}Run the following script to start/stop the Node:"
+echo "${GREEN}    \::/  /    ${NC}- start_node.sh    Use the script to start the Node"
+echo "${GREEN}     \/__/     ${NC}- stop_node.sh     Use the script to stop the Node"
+echo ${NC}
+echo "For instructions visit: ${DOC_URL}"
 echo
 }
 
@@ -1482,21 +1695,23 @@ echo
 
 #
 # Clears screen and present Energi v3 logo
-_ascii_logo
+_ascii_logo_bottom
+sleep 1
+_ascii_logo_2
+sleep 1
+_ascii_logo_3
+sleep 1
+_ascii_logo_4
+sleep 1
+_ascii_logo_5
+sleep 1
 _welcome_instructions
 
-#
-# Clears screen and present Energi v3 logo
-_ascii_logo
 # Check architecture
 _os_arch
 # Check Install type and set ENERGI3_HOME
 _check_user
 read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
-
-#
-# Clears screen and present Energi v3 logo
-_ascii_logo
 
 # Present menu to choose an option based on Installation Type determined
 case ${INSTALLTYPE} in
@@ -1857,7 +2072,6 @@ esac
 ##
 # End installer
 ##
-_ascii_logo
 _end_instructions
 
 
