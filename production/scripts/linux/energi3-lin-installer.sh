@@ -18,89 +18,6 @@ bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/energicryptocurrency/energi
 '
 #####################################################################
 
-# Make installer interactive and select normal mode by default.
-INTERACTIVE="y"
-ADVANCED="n"
-
-POSITIONAL=()
-while [[ $# -gt 0 ]]
-do
-key="$1"
-
-case $key in
-    -a|--advanced)
-    ADVANCED="y"
-    shift
-    ;;
-    
-    -n|--normal)
-    ADVANCED="n"
-    UFW="y"
-    BOOTSTRAP="y"
-    shift
-    ;;
-    -i|--externalip)
-    EXTERNALIP="$2"
-    ARGUMENTIP="y"
-    shift
-    shift
-    ;;
-    --bindip)
-    BINDIP="$2"
-    shift
-    shift
-    ;;
-    -k|--privatekey)
-    KEY="$2"
-    shift
-    shift
-    ;;
-    -u|--ufw)
-    UFW="y"
-    shift
-    ;;
-    --no-ufw)
-    UFW="n"
-    shift
-    ;;
-    -b|--bootstrap)
-    BOOTSTRAP="y"
-    shift
-    ;;
-    --no-bootstrap)
-    BOOTSTRAP="n"
-    shift
-    ;;
-    --no-interaction)
-    INTERACTIVE="n"
-    shift
-    ;;
-    -h|--help)
-    cat << EOL
-
-Energi3 installer arguments:
-
-    -n --normal               : Run installer in normal mode
-    -a --advanced             : Run installer in advanced mode
-    -i --externalip <address> : Public IP address of VPS
-    --bindip <address>        : Internal bind IP to use
-    -k --privatekey <key>     : Private key to use
-    -u --ufw                  : Install UFW
-    --no-ufw                  : Do not install UFW
-    -b --bootstrap            : Sync node using Bootstrap
-    --no-bootstrap            : Do not use Bootstrap
-    -h --help                 : Display this help text.
-    --no-interaction          : Do not wait for wallet activation.
-
-EOL
-    exit
-    ;;
-    *)    # unknown option
-    POSITIONAL+=("$1") # save it in an array for later
-    shift
-    ;;
-esac
-done
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # Global Variables
@@ -766,7 +683,7 @@ _upgrade_energi3 () {
   # Installed Version
   INSTALL_VERSION=$( ${BIN_DIR}/${ENERGI3_EXE} version | grep "^Version" | awk '{ print $2 }' | awk -F\- '{ print $1 }' 2>/dev/null )
   
-  if version_gt ${GIT_LATEST} ${INSTALL_VERSION}; then
+  if _version_gt ${GIT_LATEST} ${INSTALL_VERSION}; then
     echo "Installing newer version ${GIT_VERSION} from Github"
     _install_energi3
   else
@@ -1420,7 +1337,7 @@ ENERGI3
 echo -n ${NC}
 }
 
-_ascii_logo_top () {
+_ascii_logo_bottom () {
   echo "${GREEN}"
   clear 2> /dev/null
   cat << "ENERGI3"
@@ -1515,7 +1432,7 @@ ENERGI3
 echo -n ${NC}
 }
 
-_ascii_logo_bottom () {
+_ascii_logo_top () {
   echo "${GREEN}"
   clear 2> /dev/null
   cat << "ENERGI3"
@@ -1693,18 +1610,107 @@ echo
 #TEMP_FILENAME1=$( mktemp )
 #SP="/-\\|"
 
+# Make installer interactive and select normal mode by default.
+INTERACTIVE="y"
+ADVANCED="n"
+POSITIONAL=()
+
+while [[ $# -gt 0 ]]
+do
+  key="$1"
+
+  case $key in
+    -a|--advanced)
+        ADVANCED="y"
+        shift
+        ;;
+    -n|--normal)
+        ADVANCED="n"
+        UFW="y"
+        BOOTSTRAP="y"
+        shift
+        ;;
+    -i|--externalip)
+        EXTERNALIP="$2"
+        ARGUMENTIP="y"
+        shift
+        shift
+        ;;
+    --bindip)
+        BINDIP="$2"
+        shift
+        shift
+        ;;
+    -k|--privatekey)
+        KEY="$2"
+        shift
+        shift
+        ;;
+    -u|--ufw)
+        UFW="y"
+        shift
+        ;;
+    --no-ufw)
+        UFW="n"
+        shift
+        ;;
+    -b|--bootstrap)
+        BOOTSTRAP="y"
+        shift
+        ;;
+    --no-bootstrap)
+        BOOTSTRAP="n"
+        shift
+        ;;
+    --no-interaction)
+        INTERACTIVE="n"
+        shift
+        ;;
+    -d|--debug)
+        set -x
+        shift
+        ;;
+    -h|--help)
+        cat << EOL
+
+Energi3 installer arguments:
+
+    -n --normal               : Run installer in normal mode
+    -a --advanced             : Run installer in advanced mode
+    -i --externalip <address> : Public IP address of VPS
+    --bindip <address>        : Internal bind IP to use
+    -k --privatekey <key>     : Private key to use
+    -u --ufw                  : Install UFW
+    --no-ufw                  : Do not install UFW
+    -b --bootstrap            : Sync node using Bootstrap
+    --no-bootstrap            : Do not use Bootstrap
+    -h --help                 : Display this help text
+    --no-interaction          : Do not wait for wallet activation
+    -d --debug                : Debug mode
+
+EOL
+        exit
+        ;;
+    *)    # unknown option
+        POSITIONAL+=("$1") # save it in an array for later
+        shift
+        ;;
+  esac
+done
+
+
 #
 # Clears screen and present Energi v3 logo
 _ascii_logo_bottom
-sleep 1
+sleep 0.3
 _ascii_logo_2
-sleep 1
+sleep 0.3
 _ascii_logo_3
-sleep 1
+sleep 0.3
 _ascii_logo_4
-sleep 1
+sleep 0.3
 _ascii_logo_5
-sleep 1
+sleep 0.3
 _welcome_instructions
 
 # Check architecture
