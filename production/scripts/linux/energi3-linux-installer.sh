@@ -995,7 +995,7 @@ _add_rsa_key() {
       break
     fi
 
-    rm "${TEMP_RSA_FILE}"
+    rm -rf "${TEMP_RSA_FILE}"
   done
 }
 
@@ -1050,18 +1050,17 @@ _copy_keystore() {
     cd -
   fi
   
+  clear
   echo
   echo "This script uses https://send.firefox.com/ to transfer files from your"
   echo "desktop computer onto the vps. You can read more about the service here"
   echo "https://en.wikipedia.org/wiki/Firefox_Send"
   sleep 5
   echo
-  echo "Target: ${CONF_DIR}/keystore"
   echo "Shutdown your desktop Energi v3 node and upload the keystore file to"
   echo "https://send.firefox.com/"
   sleep 2
-  echo "Start your desktop Energi v3 node."
-  echo "Paste in the url to your keystore file below."
+  echo "Paste in the URL to your keystore file below:"
   sleep 2
   echo
   REPLY=''
@@ -1079,7 +1078,7 @@ _copy_keystore() {
 
   while :
   do
-    TEMP_DIR_NAME1=$( mktemp -d -p "${USRHOME}" )
+    TEMP_DIR_NAME=$( mktemp -d -p "${USRHOME}" )
     if [[ -z "${REPLY}" ]]
     then
       read -p "URL (leave blank to skip): " -r
@@ -1093,12 +1092,12 @@ _copy_keystore() {
     REPLY=$( echo "${REPLY}" | xargs )
     if [[ -f "${ENERGI3_HOME}/bin/ffsend" ]]
     then
-      "${ENERGI3_HOME}/bin/ffsend" download -y --verbose "${REPLY}" -o "${TEMP_DIR_NAME1}/"
+      "${ENERGI3_HOME}/bin/ffsend" download -y --verbose "${REPLY}" -o "${TEMP_DIR_NAME}/"
     else
-      ffsend download -y --verbose "${REPLY}" -o "${TEMP_DIR_NAME1}/"
+      ffsend download -y --verbose "${REPLY}" -o "${TEMP_DIR_NAME}/"
     fi
 
-    KEYSTOREFILE=$( find "${TEMP_DIR_NAME1}/" -type f )
+    KEYSTOREFILE=$( find "${TEMP_DIR_NAME}/" -type f )
     BASENAME=$( basename "${KEYSTOREFILE}" )
     ACCTNUM="0x`echo ${BASENAME} | awk -F\-\- '{ print $3 }'`"
     if [[ -z "${KEYSTOREFILE}" ]]
@@ -1112,9 +1111,9 @@ _copy_keystore() {
     then
       KEYSTORE_EXIST=`find ${CONF_DIR}/keystore -name ${BASENAME} -print`
     else
-      mkdir -p ${CONF_DIR}/keystore
-      chmod 700 ${CONF_DIR}/keystore
-      chown "${USRNAME}":"${USRNAME}" ${CONF_DIR}/keystore
+      ${SUDO} mkdir -p ${CONF_DIR}/keystore
+      ${SUDO} chmod 700 ${CONF_DIR}/keystore
+      ${SUDO} chown "${USRNAME}":"${USRNAME}" ${CONF_DIR}/keystore
       KEYSTORE_EXIST=''
     fi
     
@@ -1131,12 +1130,14 @@ _copy_keystore() {
     ${SUDO} chmod 600 "${CONF_DIR}/keystore/${BASENAME}"
     ${SUDO} chown "${USRNAME}":"${USRNAME}" "${CONF_DIR}/keystore/${BASENAME}"
     
-    echo "Keystore Account ${ACCTNUM} copied to vps"
+    echo "Keystore Account ${ACCTNUM} copied to:"
+    echo "${CONF_DIR}/keystore on VPS"
+    
+    # Remove temp directory
+    rm -rf "${TEMP_DIR_NAME}"
+    REPLY=''
 
   done
-  
-  # Remove temp directory
-  rm -rf "${TEMP_DIR_NAME1:?}"
 
 }
 
@@ -1165,6 +1166,7 @@ _migrate_wallet () {
       OTTPASS=`cat ${OTTTMPFILE} | grep "ONE TIME" | awk '{ print $5 }'`
       energi-cli dumpwallet ${TMP_DIR}/energi2wallet.dump ${OTTPASS}
       V2BLOCKCOUNT=$( energi-cli getblockcount )
+      rm -rf "${OTTTMPFILE}"
       
     else
       echo "No passphrase entered for Energi v2 Wallet.  Nothing to migrate"
@@ -1269,8 +1271,8 @@ _setup_keystore_auto_pw () {
 
     echo
     touch "${PW_DIR}/${BASENAME}.pwd"
-    chown ${USRNAME}:${USRNAME} "${PW_DIR}/${BASENAME}.pwd"
-    chmod 600 "${PW_DIR}/${BASENAME}.pwd"
+    ${SUDO} chown ${USRNAME}:${USRNAME} "${PW_DIR}/${BASENAME}.pwd"
+    ${SUDO} chmod 600 "${PW_DIR}/${BASENAME}.pwd"
     echo "${PASSWORD}" > "${PW_DIR}/${BASENAME}.pwd"
 
     # ==> Command to start with unlock password
@@ -1440,17 +1442,6 @@ ENERGI3
 echo -n ${NC}
 }
 
-#_menu_option_new () {
-#  echo "${NC}"
-#  cat << "ENERGIMENU"
-# Options:
-#    a) New server installation of Energi v3
-#
-#
-#    x) Exit without doing anything
-#ENERGIMENU
-#}
-
 _menu_option_new () {
   echo "${GREEN}"
   clear 2> /dev/null
@@ -1469,17 +1460,6 @@ echo "${GREEN}    \::/  /    ${NC}"
 echo "${GREEN}     \/__/     ${NC}   x) Exit without doing anything"
 echo ${NC}
 }
-
-#_menu_option_mig () {
-#  echo "${NC}"
-#  cat << "ENERGIMENU"
-# Options:
-#    a) Upgrade Energi v2 to v3; automatic wallet migration
-#    b) Upgrade Energi v2 to v3; manual wallet migration
-#    
-#    x) Exit without doing anything
-#ENERGIMENU
-#}
 
 _menu_option_mig () {
   echo "${GREEN}"
@@ -1500,17 +1480,6 @@ echo "${GREEN}     \/__/     ${NC}   x) Exit without doing anything"
 echo ${NC}
 }
 
-#_menu_option_upgrade () {
-#  echo "${NC}"
-#  cat << "ENERGIMENU"
-# Options:
-#    a) Upgrade version of Energi v3
-#    b) Install monitoring on Discord and/or Telegram
-#    
-#    x) Exit without doing anything
-#ENERGIMENU
-#}
-
 _menu_option_upgrade () {
   echo "${GREEN}"
   clear 2> /dev/null
@@ -1529,15 +1498,6 @@ echo "${GREEN}    \::/  /    ${NC}"
 echo "${GREEN}     \/__/     ${NC}   x) Exit without doing anything"
 echo ${NC}
 }
-
-#_welcome_instructions () {
-#  echo "${NC}"
-#  echo -e "Welcome to the Energi v3 Installer. You can use this script to:
-# - ${BLUE}New Installation :${NC} No previous version of Energi exists on the computer
-# - ${BLUE}Upgrade          :${NC} Upgrade from a previous version of Energi
-# - ${BLUE}Migrate          :${NC} Migrate from Energi v2 to Energi v3"
-#  read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
-#}
 
 _welcome_instructions () {
   echo "${GREEN}"
@@ -1558,17 +1518,6 @@ echo "${GREEN}     \/__/     ${NC}- Migrate     : Migrate from Energi v2"
 echo ${NC}
 read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
 }
-
-#_end_instructions () {
-#  echo "${NC}"
-#  echo -e "Thank you for your support of Energi! We wish you a successful staking.
-# Login as ${USRNAME} and run the following script to start/stop the Node:
-#    - ${BLUE}start_node.sh${NC}    Use the script to start the Node
-#    - ${BLUE}stop_node.sh${NC}     Use the script to stop the Node
-# For instructions visit:
-# ${DOC_URL}"
-#echo
-#}
 
 _end_instructions () {
   echo "${GREEN}"
@@ -1595,9 +1544,6 @@ echo
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 # Main Program
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
-
-#TEMP_FILENAME1=$( mktemp )
-#SP="/-\\|"
 
 # Make installer interactive and select normal mode by default.
 INTERACTIVE="y"
@@ -1704,6 +1650,7 @@ _welcome_instructions
 
 # Check architecture
 _os_arch
+
 # Check Install type and set ENERGI3_HOME
 _check_install
 read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
