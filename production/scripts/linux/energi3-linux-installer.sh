@@ -1724,7 +1724,7 @@ case ${INSTALLTYPE} in
     _menu_option_new
     
     REPLY='x'
-    read -p "Please select an option to get started (a, b, or x): " -r
+    read -p "Please select an option to get started (a or x): " -r
     REPLY=${REPLY,,} # tolower
     if [ "${REPLY}" = "" ]
     then
@@ -1826,14 +1826,13 @@ case ${INSTALLTYPE} in
     #
     # Menu Options
     #   a) Upgrade version of Energi v3
-    #   b) Install monitoring on Discord and/or Telegram
     #   x) Exit without doing anything
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     
     _menu_option_upgrade
     
     REPLY='x'
-    read -p "Please select an option to get started (a, b, or x): " -r
+    read -p "Please select an option to get started (a or x): " -r
     REPLY=${REPLY,,} # tolower
     
     if [ "x${REPLY}" = "x" ]
