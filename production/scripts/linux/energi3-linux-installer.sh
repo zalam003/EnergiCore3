@@ -13,7 +13,7 @@
 : '
 # Run the script to get started:
 ```
-bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts/energi3-lin-installer.sh)" ; source ~/.bashrc
+bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts/linux/energi3-linux-installer.sh)" ; source ~/.bashrc
 ```
 '
 #####################################################################
@@ -23,24 +23,24 @@ bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/energicryptocurrency/energi
 # Global Variables
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
 
-# Uncomment to debug
-#set -x
-
 # Check if we have enough memory
 if [[ $(free -m | awk '/^Mem:/{print $2}') -lt 850 ]]; then
   echo "This installation requires at least 1GB of RAM.";
   exit 1
 fi
 
+# OS Settings
+export DEBIAN_FRONTEND=noninteractive 
+
 # Locations of Repositories and Guide
 API_URL='https://api.github.com/repos/energicryptocurrency/energi3/releases/latest'
-SCRIPT_URL='https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts'
+SCRIPT_URL='https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts/linux'
 DOC_URL='https://energi.gitbook.io'
 #GITURL=https://raw.githubusercontent.com/energicryptocurrency/energi3
 
 # Energi v3 Bootstrap Settings
 #export BLK_HASH=gsaqiry3h1ho3nh
-#export BOOTSTRAP_URL="https://www.dropbox.com/s/%BLK_HASH%/blocks_n_chains.tar.gz"
+#export BOOTSTRAP_URL="https://www.dropbox.com/s/%BLK_HASH%/energi3bootstrap.tar.gz"
 
 # Snapshot Block (need to update)
 MAINNETSSBLOCK=1500000
@@ -139,7 +139,7 @@ _add_nrgstaker () {
       if [ ! -x "$( command -v  pwgen )" ]
       then
         echo "Installing missing package to generate random password"
-        ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq pwgen
+        ${SUDO} apt-get install -yq pwgen
       fi
       
       USRPASSWD=`pwgen 8 1`
@@ -176,7 +176,7 @@ _add_nrgstaker () {
   
 }
 
-_check_user () {
+_check_install () {
 
   # Check if run as root or user has sudo privilidges
   _check_runas
@@ -284,7 +284,7 @@ _check_user () {
               
             else
               echo "${RED}Invalid entry:${NC} Enter a number less than or equal to ${V3USRCOUNT}"
-              _check_user
+              _check_install
               
             fi
             
@@ -359,7 +359,7 @@ _check_user () {
       else
         echo "${RED}Invalid entry:${NC} Enter a number less than or equal to ${V3USRCOUNT}"
         echo "               Starting over"
-        _check_user
+        _check_install
       fi
       
       echo "Upgrading Energi v3 as ${USRNAME}"
@@ -437,12 +437,12 @@ _check_ismainnet () {
 
     if [[ "${isMainnet}" == 'y' ]] || [[ -z "${isMainnet}" ]]
     then
-      export CONF_DIR=${USRNAME}/.energicore3
+      export CONF_DIR=${USRHOME}/.energicore3
       export FWPORT=39797
       export isMainnet=y
       echo "The application will be setup for Mainnet"
     else
-      export CONF_DIR=${USRNAME}/.energicore3/testnet
+      export CONF_DIR=${USRHOME}/.energicore3/testnet
       export FWPORT=49797
       export isMainnet=n
       echo "The application will be setup for Testnet"
@@ -452,12 +452,12 @@ _check_ismainnet () {
   then
     if [ ! -d "${USRNAME}/.energicore3/testnet" ]
     then
-      export CONF_DIR=${USRNAME}/.energicore3
+      export CONF_DIR=${USRHOME}/.energicore3
       export FWPORT=39797
       export isMainnet=y
       echo "The application will be setup for Mainnet"
     else
-      export CONF_DIR=${USRNAME}/.energicore3/testnet
+      export CONF_DIR=${USRHOME}/.energicore3/testnet
       export FWPORT=49797
       export isMainnet=n
       echo "The application will be setup for Testnet"
@@ -467,12 +467,12 @@ _check_ismainnet () {
     # INSTALLTYPE = migrate
     if [ ! -d "${USRNAME}/.energicore/testnet" ]
     then
-      export CONF_DIR=${USRNAME}/.energicore3
+      export CONF_DIR=${USRHOME}/.energicore3
       export FWPORT=39797
       export isMainnet=y
       echo "The application will be setup for Mainnet"
     else
-      export CONF_DIR=${USRNAME}/.energicore3/testnet
+      export CONF_DIR=${USRHOME}/.energicore3/testnet
       export FWPORT=49797
       export isMainnet=n
       echo "The application will be setup for Testnet"
@@ -502,19 +502,19 @@ _install_apt () {
     echo "Updating linux first."
     echo "Running apt-get update."
     sleep 2
-    ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get update -yq
+    ${SUDO} apt-get update -yq
     echo "Running apt-get upgrade."
     sleep 2
-    ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
+    ${SUDO} apt-get upgrade -yq
     echo "Running apt-get dist-upgrade."
     sleep 2
-    ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
+    ${SUDO} apt-get -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
 
     if [ ! -x "$( command -v unattended-upgrade )" ]
     then
       echo "Running apt-get install unattended-upgrades php ufw."
       sleep 1
-      ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq unattended-upgrades php ufw
+      ${SUDO} apt-get install -yq unattended-upgrades php ufw
       
       if [ ! -f /etc/apt/apt.conf.d/20auto-upgrades ]
       then
@@ -534,7 +534,7 @@ UBUNTU_SECURITY_PACKAGES
   # Install missing programs if needed.
   if [ ! -x "$( command -v aria2c )" ]
   then
-    ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+    ${SUDO} apt-get install -yq \
       curl \
       lsof \
       util-linux \
@@ -829,29 +829,23 @@ _setup_two_factor() {
   if [[ ! -z "${NEW_PACKAGES}" ]]
   then
     # shellcheck disable=SC2086
-    ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq ${NEW_PACKAGES}
+    ${SUDO} apt-get install -yq ${NEW_PACKAGES}
 
     ${SUDO} service apache2 stop 2>/dev/null
     ${SUDO} update-rc.d apache2 disable 2>/dev/null
     ${SUDO} update-rc.d apache2 remove 2>/dev/null
   fi
 
-  if [[ -f "${ETC_DIR}/otp.php" ]]
+  if [[ ! -f "${ETC_DIR}/otp.php" ]]
   then
-    cp "${ETC_DIR}/otp.php" "${USRHOME}/___otp.php"
-    ${SUDO} chmod 644 "${USRHOME}/___otp.php"    
-  else
     cd ${ETC_DIR}
     wget -4qo- ${SCRIPT_URL}/thirdparty/otp.php -O "otp.php" --show-progress --progress=bar:force:noscroll 2>&1
-    cp "${ETC_DIR}/otp.php" "${USRHOME}/___otp.php"
-    ${SUDO} chmod 644 "${USRHOME}/___otp.php"  
     ${SUDO} chmod 644 "${ETC_DIR}/otp.php"
     cd -
   fi
   
   if [[ ${EUID} = 0 ]]
   then
-    ${SUDO} chown ${USRNAME}:${USRNAME} "${USRHOME}/___otp.php"
     ${SUDO} chown ${USRNAME}:${USRNAME} "${ETC_DIR}/otp.php"
   fi
 
@@ -925,7 +919,7 @@ _setup_two_factor() {
       return
     fi
 
-    KEY_CHECK=$( php "${USRHOME}/___otp.php" "${REPLY}" "${USRHOME}/.google_authenticator.temp" )
+    KEY_CHECK=$( php "${ETC_DIR}/otp.php" "${REPLY}" "${USRHOME}/.google_authenticator.temp" )
     if [[ ! -z "${KEY_CHECK}" ]]
     then
       echo "${KEY_CHECK}"
@@ -975,11 +969,6 @@ _setup_two_factor() {
     rm -f "${USRHOME}/.google_authenticator"
   fi
 
-  # Clean up.
-  if [[ -f "${USRHOME}/___otp.php" ]]
-  then
-    rm -rf "${USRHOME}/___otp.php"
-  fi
 }
 
 _add_rsa_key() {
@@ -1013,7 +1002,7 @@ _add_rsa_key() {
 _check_clock() {
   if [ ! -x "$( command -v ntpdate )" ]
   then
-    ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq ntpdate
+    ${SUDO} apt-get install -yq ntpdate
   fi
   echo "Checking system clock..."
   ${SUDO} ntpdate -q pool.ntp.org | tail -n 1 | grep -o 'offset.*' | awk '{print $1 ": " $2 " " $3 }'
@@ -1043,9 +1032,9 @@ _copy_keystore() {
     # Install ffsend and jq as well.
   if [ ! -x "$( command -v snap )" ] || [ ! -x "$( command -v jq )" ] || [ ! -x "$( command -v column )" ]
   then
-    ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq snap
-    ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq snapd
-    ${SUDO} DEBIAN_FRONTEND=noninteractive apt-get install -yq jq bsdmainutils
+    ${SUDO} apt-get install -yq snap
+    ${SUDO} apt-get install -yq snapd
+    ${SUDO} apt-get install -yq jq bsdmainutils
   fi
   if [ ! -x "$( command -v ffsend )" ]
   then
@@ -1716,7 +1705,7 @@ _welcome_instructions
 # Check architecture
 _os_arch
 # Check Install type and set ENERGI3_HOME
-_check_user
+_check_install
 read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
 
 # Present menu to choose an option based on Installation Type determined
