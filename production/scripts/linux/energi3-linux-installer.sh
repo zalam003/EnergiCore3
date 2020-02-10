@@ -501,20 +501,20 @@ _install_apt () {
   then
     echo "Updating linux first."
     echo "Running apt-get update."
-    sleep 2
-    ${SUDO} apt-get update -yq
+    sleep 1
+    ${SUDO} apt-get update -yq 2> /dev/null
     echo "Running apt-get upgrade."
-    sleep 2
-    ${SUDO} apt-get upgrade -yq
+    sleep 1
+    ${SUDO} apt-get upgrade -yq 2> /dev/null
     echo "Running apt-get dist-upgrade."
-    sleep 2
-    ${SUDO} apt-get -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
+    sleep 1
+    ${SUDO} apt-get -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade 2> /dev/null
 
     if [ ! -x "$( command -v unattended-upgrade )" ]
     then
       echo "Running apt-get install unattended-upgrades php ufw."
       sleep 1
-      ${SUDO} apt-get install -yq unattended-upgrades php ufw
+      ${SUDO} apt-get install -yq unattended-upgrades php ufw 2> /dev/null
       
       if [ ! -f /etc/apt/apt.conf.d/20auto-upgrades ]
       then
@@ -1234,7 +1234,7 @@ _setup_keystore_auto_pw () {
     BASENAME=$( basename ${KS} )
     PWACCTNUM="0x`echo ${BASENAME} | awk -F\-\- '{ print $3 }'`"
 
-    rm -f "${ENERGI3_HOME}/.secure/${BASENAME}.pwd" 2>/dev/null
+    rm -f "${ENERGI3_HOME}/.secure/${PWACCTNUM}.pwd" 2>/dev/null
     unset PASSWORD
     unset CHARCOUNT
     echo -n "Set password for account ${PWACCTNUM}: "
@@ -1270,10 +1270,10 @@ _setup_keystore_auto_pw () {
     stty echo
 
     echo
-    touch "${PW_DIR}/${BASENAME}.pwd"
-    ${SUDO} chown ${USRNAME}:${USRNAME} "${PW_DIR}/${BASENAME}.pwd"
-    ${SUDO} chmod 600 "${PW_DIR}/${BASENAME}.pwd"
-    echo "${PASSWORD}" > "${PW_DIR}/${BASENAME}.pwd"
+    touch "${PW_DIR}/${PWACCTNUM}.pwd"
+    ${SUDO} chown ${USRNAME}:${USRNAME} "${PW_DIR}/${PWACCTNUM}.pwd"
+    ${SUDO} chmod 600 "${PW_DIR}/${PWACCTNUM}.pwd"
+    echo "${PASSWORD}" > "${PW_DIR}/${PWACCTNUM}.pwd"
 
     # ==> Command to start with unlock password
     echo "Placeholder: enter script to start node"
