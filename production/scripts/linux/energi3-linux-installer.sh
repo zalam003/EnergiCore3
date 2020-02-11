@@ -37,7 +37,9 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Locations of Repositories and Guide
 API_URL='https://api.github.com/repos/energicryptocurrency/energi3/releases/latest'
-SCRIPT_URL='https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts/linux'
+BASE_URL='https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts'
+SCRIPT_URL='${BASE_URL}/linux'
+TP_URL='${BASE_URL}/thirdparty'
 DOC_URL='https://energi.gitbook.io'
 #GITURL=https://raw.githubusercontent.com/energicryptocurrency/energi3
 
@@ -892,9 +894,8 @@ _setup_two_factor() {
   if [[ ! -f "${ETC_DIR}/otp.php" ]]
   then
     cd ${ETC_DIR}
-    wget -4qo- ${SCRIPT_URL}/thirdparty/otp.php -O "otp.php" --show-progress --progress=bar:force:noscroll 2>&1
+    wget -4qo- ${TP_URL}/otp.php -O "otp.php" --show-progress --progress=bar:force:noscroll 2>&1
     chmod 644 "${ETC_DIR}/otp.php"
-    exit
     cd -
   fi
   
