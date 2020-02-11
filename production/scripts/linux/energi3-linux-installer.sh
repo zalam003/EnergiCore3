@@ -1,14 +1,17 @@
 #!/bin/bash
 
-#####################################################################
+######################################################################
 # Copyright (c) 2020
 # All rights reserved.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
 #
-# Desc:   Batch script to download and setup Energi 3.x on Linux. The
-#         script will upgrade an existing installation.
+# Desc:   Batch script to download and setup Energi v3 on Linux. The
+#         script will upgrade an existing installation. If v2 is
+#         installed on the VPS, the script can be used to auto migrate
+#         from v2 to v3.
 # 
-# Version:1.0 ZA Initial Script
+# Version:
+#   1.0.0 20200212 ZA Initial Script
 #
 : '
 # Run the script to get started:
@@ -16,7 +19,7 @@
 bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts/linux/energi3-linux-installer.sh)" ; source ~/.bashrc
 ```
 '
-#####################################################################
+######################################################################
 
 
 ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ###
@@ -95,7 +98,7 @@ _check_runas () {
   # Who is running the script
   # If root no sudo required
   # If user has sudo privilidges, run sudo when necessary
-  #
+
   RUNAS=`whoami`
   
   if [[ $EUID = 0 ]]
@@ -119,7 +122,8 @@ _check_runas () {
 
 _add_nrgstaker () {
   
-  #Check if user nrgstaker exists if not add the user
+  # Check if user nrgstaker exists if not add the user
+  
   CHKPASSWD=`grep ${USRNAME} /etc/passwd`
   
   if [ "${CHKPASSWD}" == "" ]
@@ -164,9 +168,12 @@ _add_nrgstaker () {
     fi
 
     ${SUDO} usermod -aG sudo ${USRNAME}
-    ${SUDO} touch /home/${USRNAME}/.sudo_as_admin_successful
-    ${SUDO} chown ${USRNAME}:${USRNAME} /home/${USRNAME}/.sudo_as_admin_successful
-    ${SUDO} chmod 644 /home/${USRNAME}/.sudo_as_admin_successful
+    touch /home/${USRNAME}/.sudo_as_admin_successful
+    chmod 644 /home/${USRNAME}/.sudo_as_admin_successful
+    if [[ ${EUID} = 0 ]]
+    then
+        chown ${USRNAME}:${USRNAME} /home/${USRNAME}/.sudo_as_admin_successful
+    fi
     echo
     echo "${GREEN}*** User ${USRNAME} created and added to sudoer group                       ***${NC}"
     echo "${GREEN}*** User ${USRNAME} will be used to install the software and configurations ***${NC}"
@@ -179,6 +186,7 @@ _add_nrgstaker () {
 _check_install () {
 
   # Check if run as root or user has sudo privilidges
+  
   _check_runas
   
   CHKV3USRTMP=/tmp/chk_v3_usr.tmp
@@ -189,7 +197,7 @@ _check_install () {
   case ${V3USRCOUNT} in
   
     0)
-      #
+      
       # New Installation:
       #   * No energi3.ipc file on the computer
       #   * No energi.conf or energid on the computer
@@ -200,7 +208,7 @@ _check_install () {
       #   * energi3.ipc file exists on the computer
       #   * Keystore file does not exists
       #   * No $ENERGI3_HOME/etc/migrated_to_v3.log exists
-      #
+      
       echo -n "Checking if Energi v2 is installed: "
       CHKV2USRTMP=/tmp/chk_v2_usr.tmp
       ${SUDO} find /home -name energi.conf | awk -F\/ '{print $3}' > ${CHKV2USRTMP}
@@ -228,7 +236,7 @@ _check_install () {
           # Energi v2 is installed
           #
           # User has option to do a fresh install or migrate
-          #
+          
           echo "${GREEN}Installed${NC}"
           echo
           echo "You have two options to install Energi v3:"
@@ -266,6 +274,14 @@ _check_install () {
             then
               # Based on selection, assign from array of USR
               USRNAME="${USR[${REPLY}]}"
+              
+              if [[ "${USRNAME}" -ne "${RUNAS}" ]]
+              then
+                clear
+                echo "You have to run the script as root or ${USRNAME}"
+                echo "Login as ${USRNAME} and run the script again"
+                exit 0
+              fi
               
               export USRHOME=`grep "^${USRNAME}:" /etc/passwd | awk -F: '{print $6}'`
               export ENERGI3_HOME=${USRHOME}/energi3
@@ -309,12 +325,12 @@ _check_install () {
       ;;
       
     1)
-      #
+      
       # Upgrade existing version of Energi 3:
       #   * One instance of Energi v3 is already installed
       #   * energi3.ipc file exists
       #   * Version on computer is older than version in Github
-      # 
+      
       export USRNAME=`cat ${CHKV3USRTMP}`
       INSTALLTYPE=upgrade
       echo "The script will latest version available in Github and upgrade installed"
@@ -326,13 +342,13 @@ _check_install () {
       ;;
   
     *)
-      #
+      
       # Upgrade existing version of Energi 3:
       #   * More than one instance of Energi v3 is already installed
       #   * energi3.ipc file exists
       #   * Version on computer is older than version in Github
       #   * User selects which instance to upgrade
-      #
+      
       I=1
       for U in `cat ${CHKV3USRTMP}`
       do
@@ -351,6 +367,15 @@ _check_install () {
       if [ ${REPLY} -le ${V3USRCOUNT} ]
       then
         export USRNAME=${USR[${REPLY}]}
+        
+        if [[ "${USRNAME}" -ne "${RUNAS}" ]]
+        then
+          clear
+          echo "You have to run the script as root or ${USRNAME}"
+          echo "Login as ${USRNAME} and run the script again"
+          exit 0
+        fi
+              
         INSTALLTYPE=upgrade
         
         export USRHOME=`grep "^${USRNAME}:" /etc/passwd | awk -F: '{print $6}'`
@@ -375,6 +400,8 @@ _check_install () {
 
 _setup_appdir () {
 
+  # Setup application directories if does not exist
+  
   CHK_HOME='n'
   while [ ${CHK_HOME} != "y" ]
   do
@@ -421,7 +448,10 @@ _setup_appdir () {
   fi
   
   echo "Changing ownership of ${ENERGI3_HOME} to ${USRNAME}"
-  ${SUDO} chown -R ${USRNAME}:${USRNAME} ${ENERGI3_HOME}
+  if [[ ${EUID} = 0 ]]
+    then
+      chown -R ${USRNAME}:${USRNAME} ${ENERGI3_HOME}
+  fi
   
 }
 
@@ -429,6 +459,7 @@ _check_ismainnet () {
 
   # Confirm Mainnet or Testnet
   # Default: Mainnet
+  
   if [[ "${INSTALLTYPE}" == "new" ]]
   then
     isMainnet=y
@@ -484,11 +515,12 @@ _check_ismainnet () {
 _stop_energi3 () {
 
   # Check if energi3 process is running and stop it
+  
   ENERGI3PID=`ps -ef | grep energi3 | grep -v "grep energi3" | grep -v "color=auto" | awk '{print $2}' `
   if [ ! -z "${ENERGI3PID}" ]
   then
     echo "Stopping Energi v3"
-    echo "Code to stop energi3 to be added"
+    echo "Code to stop energi3 to be added. Open a new windoes and exit energi3 node."
     sleep 3
   fi
 }
@@ -497,6 +529,7 @@ _install_apt () {
 
   # Check if any apt packages need installing or upgrade
   # Setup server to auto updating security related packages automatically
+  
   if [ ! -x "$( command -v aria2c )" ] || [ ! -x "$( command -v unattended-upgrade )" ] || [ ! -x "$( command -v ntpdate )" ] || [ ! -x "$( command -v google-authenticator )" ] || [ ! -x "$( command -v php )" ] || [ ! -x "$( command -v jq )" ]  || [ ! -x "$( command -v qrencode )" ]
   then
     echo "Updating linux first."
@@ -527,6 +560,7 @@ APT::Periodic::Download-Upgradeable-Packages "1";
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
 UBUNTU_SECURITY_PACKAGES
+
       fi
     fi
   fi
@@ -564,18 +598,20 @@ UBUNTU_SECURITY_PACKAGES
       pcregrep \
       snapd \
       aria2 \
-      dbus-user-session
+      dbus-user-session 2> /dev/null
   fi
   
   if [ ! -x "$( command -v jq )" ]
   then
-    ${SUDO} apt-get install -yq jq
+    echo "Installing jq"
+    ${SUDO} apt-get install -yq jq 2> /dev/null
   fi
-  ${SUDO} apt-get install -yq screen
-  ${SUDO} apt-get install -yq nodejs
+  echo "Installing screen and nodejs"
+  ${SUDO} apt-get install -yq screen 2> /dev/null
+  ${SUDO} apt-get install -yq nodejs 2> /dev/null
   
   echo "Removing apt files not required"
-  ${SUDO} apt autoremove -y
+  ${SUDO} apt autoremove -y 2> /dev/null
   
 }
 
@@ -605,6 +641,8 @@ ENERGI3_LOGROTATE
 
 _install_energi3 () {
 
+  # Download and install node software and supporting scripts
+
   # Name of scripts
   #NODE_SCRIPT=start_staking.sh
   #MN_SCRIPT=start_mn.sh
@@ -626,10 +664,13 @@ _install_energi3 () {
   then
     mv ${ENERGI3_EXE} ${ENERGI3_EXE}.old
   fi
-  ${SUDO} wget -4qo- "${BIN_URL}" -O "${ENERGI3_EXE}" --show-progress --progress=bar:force:noscroll 2>&1
+  wget -4qo- "${BIN_URL}" -O "${ENERGI3_EXE}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 755 ${ENERGI3_EXE}
-  chown ${USRNAME}:${USRNAME} ${ENERGI3_EXE}
+  if [[ ${EUID} = 0 ]]
+  then
+    chown ${USRNAME}:${USRNAME} ${ENERGI3_EXE}
+  fi    
   
   if [ -f "${NODE_SCRIPT}" ]
   then
@@ -638,7 +679,10 @@ _install_energi3 () {
   wget -4qo- "${SCRIPT_URL}/scripts/${NODE_SCRIPT}?dl=1" -O "${NODE_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 755 ${NODE_SCRIPT}
-  chown ${USRNAME}:${USRNAME} ${NODE_SCRIPT}
+  if [[ ${EUID} = 0 ]]
+  then
+    chown ${USRNAME}:${USRNAME} ${NODE_SCRIPT}
+  fi
 
   if [ -f "${MN_SCRIPT}" ]
   then
@@ -647,7 +691,10 @@ _install_energi3 () {
   wget -4qo- "${SCRIPT_URL}/scripts/${MN_SCRIPT}?dl=1" -O "${MN_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 755 ${MN_SCRIPT}
-  chown ${USRNAME}:${USRNAME} ${MN_SCRIPT}
+  if [[ ${EUID} = 0 ]]
+  then
+    chown ${USRNAME}:${USRNAME} ${MN_SCRIPT}
+  fi
 
   cd ${JS_DIR}
   if [ -f "${JS_SCRIPT}" ]
@@ -657,7 +704,10 @@ _install_energi3 () {
   wget -4qo- "${SCRIPT_URL}/js/${JS_SCRIPT}?dl=1" -O "${JS_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 644 ${JS_SCRIPT}
-  chown ${USRNAME}:${USRNAME} ${JS_SCRIPT}
+  if [[ ${EUID} = 0 ]]
+  then
+    chown ${USRNAME}:${USRNAME} ${JS_SCRIPT}
+  fi
   
   # Change to install directory
   cd
@@ -667,13 +717,15 @@ _install_energi3 () {
 _version_gt() { 
 
   # Check if FIRST version is greater than SECOND version
+  
   test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; 
   
 }
 
 _upgrade_energi3 () {
 
-  # Get the latest version from Github 
+  # Check the latest version in Github 
+  
   GITHUB_LATEST=$( curl -s ${API_URL} )
   GIT_VERSION=$( echo "${GITHUB_LATEST}" | jq -r '.tag_name' )
   
@@ -695,6 +747,7 @@ _upgrade_energi3 () {
 }
 
 _restrict_logins() {
+
   # Secure server by restricting who can login
   
   # Have linux passwords show stars.
@@ -828,8 +881,8 @@ _setup_two_factor() {
   fi
   if [[ ! -z "${NEW_PACKAGES}" ]]
   then
-    # shellcheck disable=SC2086
-    ${SUDO} apt-get install -yq ${NEW_PACKAGES}
+    echo "Installing ${NEW_PACKAGES}"
+    ${SUDO} apt-get install -yq ${NEW_PACKAGES} 2>/dev/null
 
     ${SUDO} service apache2 stop 2>/dev/null
     ${SUDO} update-rc.d apache2 disable 2>/dev/null
@@ -840,13 +893,13 @@ _setup_two_factor() {
   then
     cd ${ETC_DIR}
     wget -4qo- ${SCRIPT_URL}/thirdparty/otp.php -O "otp.php" --show-progress --progress=bar:force:noscroll 2>&1
-    ${SUDO} chmod 644 "${ETC_DIR}/otp.php"
+    chmod 644 "${ETC_DIR}/otp.php"
     cd -
   fi
   
   if [[ ${EUID} = 0 ]]
   then
-    ${SUDO} chown ${USRNAME}:${USRNAME} "${ETC_DIR}/otp.php"
+    chown ${USRNAME}:${USRNAME} "${ETC_DIR}/otp.php"
   fi
 
   # Generate otp.
@@ -933,7 +986,10 @@ _setup_two_factor() {
   if [[ -f "${USRHOME}/.google_authenticator.temp" ]]
   then
     chmod "${CHMOD_G_AUTH}" "${USRHOME}/.google_authenticator.temp"
-    chown ${USRNAME}:${USRNAME} "${USRHOME}/.google_authenticator.temp"
+    if [[ ${EUID} = 0 ]]
+    then
+      chown ${USRNAME}:${USRNAME} "${USRHOME}/.google_authenticator.temp"
+    fi
     mv "${USRHOME}/.google_authenticator.temp" "${USRHOME}/.google_authenticator"
   fi
 
@@ -1002,7 +1058,8 @@ _add_rsa_key() {
 _check_clock() {
   if [ ! -x "$( command -v ntpdate )" ]
   then
-    ${SUDO} apt-get install -yq ntpdate
+    echo "Installing ntpdate"
+    ${SUDO} apt-get install -yq ntpdate 2>/dev/null
   fi
   echo "Checking system clock..."
   ${SUDO} ntpdate -q pool.ntp.org | tail -n 1 | grep -o 'offset.*' | awk '{print $1 ": " $2 " " $3 }'
@@ -1012,6 +1069,7 @@ _add_swap () {
   # Add 2GB additional swap
   if [ ! /var/swapfile ]
   then
+    echo "Adding additional swap"
     ${SUDO} fallocate -l 2G /var/swapfile
     ${SUDO} chmod 600 /var/swapfile
     ${SUDO} mkswap /var/swapfile
@@ -1032,9 +1090,10 @@ _copy_keystore() {
     # Install ffsend and jq as well.
   if [ ! -x "$( command -v snap )" ] || [ ! -x "$( command -v jq )" ] || [ ! -x "$( command -v column )" ]
   then
-    ${SUDO} apt-get install -yq snap
-    ${SUDO} apt-get install -yq snapd
-    ${SUDO} apt-get install -yq jq bsdmainutils
+    echo "Installing snap, snapd, bsdmainutils"
+    ${SUDO} apt-get install -yq snap 2>/dev/null
+    ${SUDO} apt-get install -yq snapd 2>/dev/null
+    ${SUDO} apt-get install -yq jq bsdmainutils 2>/dev/null
   fi
   if [ ! -x "$( command -v ffsend )" ]
   then
@@ -1071,8 +1130,11 @@ _copy_keystore() {
     then      
       echo "Please copy the keystore file to ${CONF_DIR}/keystore directory on your own"
       read -p "Press Enter Once Done: " -r
-      ${SUDO} chown "${USRNAME}":"${USRNAME}" "${CONF_DIR}/keystore/UTC*"
-      ${SUDO} chmod 600 "${CONF_DIR}/keystore/UTC*"
+      if [[ ${EUID} = 0 ]]
+      then
+        chown "${USRNAME}":"${USRNAME}" "${CONF_DIR}/keystore/UTC*"
+      fi
+      chmod 600 "${CONF_DIR}/keystore/UTC*"
     fi
   done
 
@@ -1111,24 +1173,33 @@ _copy_keystore() {
     then
       KEYSTORE_EXIST=`find ${CONF_DIR}/keystore -name ${BASENAME} -print`
     else
-      ${SUDO} mkdir -p ${CONF_DIR}/keystore
-      ${SUDO} chmod 700 ${CONF_DIR}/keystore
-      ${SUDO} chown "${USRNAME}":"${USRNAME}" ${CONF_DIR}/keystore
+      mkdir -p ${CONF_DIR}/keystore
+      chmod 700 ${CONF_DIR}/keystore
+      if [[ ${EUID} = 0 ]]
+      then
+        chown "${USRNAME}":"${USRNAME}" ${CONF_DIR}/keystore
+      fi
       KEYSTORE_EXIST=''
     fi
     
     if [[ ! -z "${KEYSTORE_EXIST}" ]]
     then
       echo "Backing up ${BASENAME} file"
-      ${SUDO} mkdir -p ${ENERGI3_HOME}/backups
-      ${SUDO} mv "${CONF_DIR}/keystore/${BASENAME}" "${ENERGI3_HOME}/backups/${BASENAME}.bak"
-      ${SUDO} chown "${USRNAME}":"${USRNAME}" ${ENERGI3_HOME}/backups
+      mkdir -p ${ENERGI3_HOME}/backups
+      mv "${CONF_DIR}/keystore/${BASENAME}" "${ENERGI3_HOME}/backups/${BASENAME}.bak"
+      if [[ ${EUID} = 0 ]]
+      then      
+        chown "${USRNAME}":"${USRNAME}" ${ENERGI3_HOME}/backups
+      fi
     fi
     
     #
-    ${SUDO} mv "${KEYSTOREFILE}" "${CONF_DIR}/keystore/${BASENAME}"   
-    ${SUDO} chmod 600 "${CONF_DIR}/keystore/${BASENAME}"
-    ${SUDO} chown "${USRNAME}":"${USRNAME}" "${CONF_DIR}/keystore/${BASENAME}"
+    mv "${KEYSTOREFILE}" "${CONF_DIR}/keystore/${BASENAME}"   
+    chmod 600 "${CONF_DIR}/keystore/${BASENAME}"
+    if [[ ${EUID} = 0 ]]
+    then
+      chown "${USRNAME}":"${USRNAME}" "${CONF_DIR}/keystore/${BASENAME}"
+    fi
     
     echo "Keystore Account ${ACCTNUM} copied to:"
     echo "${CONF_DIR}/keystore on VPS"
@@ -1212,8 +1283,11 @@ _setup_keystore_auto_pw () {
   if [[ ! -d "${PW_DIR}" ]]
   then
     mkdir -p "${PW_DIR}"
-    chown ${USRNAME}:${USRNAME} ${PW_DIR}
-    chown 700 ${PW_DIR}
+    chmod 700 ${PW_DIR}
+    if [[ ${EUID} = 0 ]]
+    then
+      chown ${USRNAME}:${USRNAME} ${PW_DIR}
+    fi
   fi
 
   # See if node is unlocked for staking.
@@ -1271,9 +1345,12 @@ _setup_keystore_auto_pw () {
 
     echo
     touch "${PW_DIR}/${PWACCTNUM}.pwd"
-    ${SUDO} chown ${USRNAME}:${USRNAME} "${PW_DIR}/${PWACCTNUM}.pwd"
-    ${SUDO} chmod 600 "${PW_DIR}/${PWACCTNUM}.pwd"
     echo "${PASSWORD}" > "${PW_DIR}/${PWACCTNUM}.pwd"
+    chmod 600 "${PW_DIR}/${PWACCTNUM}.pwd"
+    if [[ ${EUID} = 0 ]]
+    then
+      chown ${USRNAME}:${USRNAME} "${PW_DIR}/${PWACCTNUM}.pwd"
+    fi
 
     # ==> Command to start with unlock password
     echo "Placeholder: enter script to start node"
@@ -1609,9 +1686,9 @@ do
         cat << EOL
 
 Energi3 installer arguments:
-
     -n --normal               : Run installer in normal mode
     -a --advanced             : Run installer in advanced mode
+    --no-interaction          : Do not wait for wallet activation
     -i --externalip <address> : Public IP address of VPS
     --bindip <address>        : Internal bind IP to use
     -k --privatekey <key>     : Private key to use
@@ -1620,7 +1697,6 @@ Energi3 installer arguments:
     -b --bootstrap            : Sync node using Bootstrap
     --no-bootstrap            : Do not use Bootstrap
     -h --help                 : Display this help text
-    --no-interaction          : Do not wait for wallet activation
     -d --debug                : Debug mode
 
 EOL
