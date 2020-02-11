@@ -1292,7 +1292,9 @@ _migrate_wallet () {
   fi
 }
 
-_setup_keystore_auto_pw () {
+_store_keystore_pw () {
+
+  # Store keystore password for auto restart
 
   # Create secure directory
   if [[ ! -d "${PW_DIR}" ]]
@@ -1367,13 +1369,13 @@ _setup_keystore_auto_pw () {
       chown ${USRNAME}:${USRNAME} "${PW_DIR}/${PWACCTNUM}.pwd"
     fi
 
-    # ==> Command to start with unlock password
-    echo "Placeholder: enter script to start node"
-    sleep 0.5
   done
-  
+ 
   unset PASSWORD
   unset CHARCOUNT
+}
+
+_v2_balance() {
 
   # Output info.
   echo "Placeholder"
@@ -1389,8 +1391,6 @@ _setup_keystore_auto_pw () {
   echo "Staking Status:"
   energi-cli getstakingstatus | grep -C 20 --color -E '^|.*false'
   CONF_FILE_BASENAME=$( basename "${CONF_FILE}" )
-  echo
-  echo
   echo
   echo "Start or Restart your desktop wallet after adding the line below to the"
   echo "desktop wallet's conf file ${CONF_FILE_BASENAME}. You can edit it from "
@@ -1826,7 +1826,7 @@ case ${INSTALLTYPE} in
         REPLY=${REPLY,,} # tolower
         if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
         then
-          _setup_keystore_auto_pw
+          _store_keystore_pw
         fi
         
         ;;
@@ -1932,7 +1932,7 @@ case ${INSTALLTYPE} in
         REPLY=${REPLY,,} # tolower
         if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
         then
-          _setup_keystore_auto_pw
+          _store_keystore_pw
         fi
         
         ;;
@@ -2066,7 +2066,7 @@ case ${INSTALLTYPE} in
         REPLY=${REPLY,,} # tolower
         if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
         then
-          _setup_keystore_auto_pw
+          _store_keystore_pw
         fi
         
         ;;
