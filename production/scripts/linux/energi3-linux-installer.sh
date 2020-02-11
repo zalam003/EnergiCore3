@@ -37,7 +37,10 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Locations of Repositories and Guide
 API_URL='https://api.github.com/repos/energicryptocurrency/energi3/releases/latest'
-BASE_URL='https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts'
+# Production
+#BASE_URL='https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts'
+# Test
+BASE_URL='https://raw.githubusercontent.com/zalam003/EnergiCore3/master/production/scripts'
 SCRIPT_URL='${BASE_URL}/linux'
 TP_URL='${BASE_URL}/thirdparty'
 DOC_URL='https://energi.gitbook.io'
