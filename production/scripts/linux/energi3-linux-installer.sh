@@ -897,7 +897,8 @@ _setup_two_factor() {
   if [[ ! -f "${ETC_DIR}/otp.php" ]]
   then
     cd ${ETC_DIR}
-    wget -4qo- ${TP_URL}/otp.php -O "otp.php" --show-progress --progress=bar:force:noscroll 2>&1
+    echo "${TP_URL}/otp.php"
+    wget -4qo- ${TP_URL}/otp.php -O "${ETC_DIR}/otp.php" --show-progress --progress=bar:force:noscroll 2>&1
     chmod 644 "${ETC_DIR}/otp.php"
     cd -
   fi
@@ -953,9 +954,6 @@ _setup_two_factor() {
   echo "Warning: pasting the following URL into your browser exposes the OTP secret to Google:"
   echo "https://www.google.com/chart?chs=200x200&chld=M|0&cht=qr&chl=otpauth://totp/ssh%2520login%2520for%2520'${USRNAME}'%3Fsecret%3D${SECRET}%26issuer%3D${IP_ADDRESS}"
   echo
-  stty sane 2>/dev/null
-  qrencode -l L -m 2 -t UTF8 "otpauth://totp/ssh%20login%20for%20'${USRNAME}'?secret=${SECRET}&issuer=${IP_ADDRESS}"
-  stty sane 2>/dev/null
   echo "Scan the QR code with the Google Authenticator app; or manually enter"
   echo "Account: ${USRNAME}@${IP_ADDRESS}"
   echo "Key: ${SECRET}"
@@ -963,6 +961,9 @@ _setup_two_factor() {
   echo "When logging into this VPS via password, a 6 digit code would also be required."
   echo "If you loose this code you can still use your wallet on your desktop."
   echo
+  stty sane 2>/dev/null
+  qrencode -l L -m 2 -t UTF8 "otpauth://totp/ssh%20login%20for%20'${USRNAME}'?secret=${SECRET}&issuer=${IP_ADDRESS}"
+  stty sane 2>/dev/null
 
   # Validate otp.
   while :
