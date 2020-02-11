@@ -153,7 +153,7 @@ _add_nrgstaker () {
       echo "  Password: ${BLUE}${USRPASSWD}${NC}"
       echo
       REPLY=''
-      read -n 1 -p "Did you write down the username and password? y/[n]: "
+      read -p "Did you write down the username and password? y/[n]: "
       REPLY=${REPLY,,} # tolower
       if [[ "${REPLY}" == "n" ]] || [[ -z "${REPLY}" ]]
       then
@@ -825,7 +825,7 @@ _secure_host() {
   if [[ ! -x "$( command -v  ufw )" ]]
   then
     echo "Installing missing package to secure server"
-    ${SUDO} apt-get install -yq ufw
+    ${SUDO} apt-get install -yq ufw 2:/dev/null
   fi
   
   echo "Limiting secure shell (ssh) to access servers and RPC port ${FWPORT} to access Energi3 Node"
@@ -894,6 +894,7 @@ _setup_two_factor() {
     cd ${ETC_DIR}
     wget -4qo- ${SCRIPT_URL}/thirdparty/otp.php -O "otp.php" --show-progress --progress=bar:force:noscroll 2>&1
     chmod 644 "${ETC_DIR}/otp.php"
+    exit
     cd -
   fi
   
