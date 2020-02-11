@@ -517,19 +517,6 @@ _check_ismainnet () {
   sleep 0.3
 }
 
-_stop_energi3 () {
-
-  # Check if energi3 process is running and stop it
-  
-  ENERGI3PID=`ps -ef | grep energi3 | grep -v "grep energi3" | grep -v "color=auto" | awk '{print $2}' `
-  if [ ! -z "${ENERGI3PID}" ]
-  then
-    echo "Stopping Energi v3"
-    echo "Code to stop energi3 to be added. Open a new windoes and exit energi3 node."
-    sleep 3
-  fi
-}
-
 _install_apt () {
 
   # Check if any apt packages need installing or upgrade
@@ -681,7 +668,7 @@ _install_energi3 () {
   then
     mv ${NODE_SCRIPT} ${NODE_SCRIPT}.old
   fi  
-  wget -4qo- "${SCRIPT_URL}/scripts/${NODE_SCRIPT}?dl=1" -O "${NODE_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
+  wget -4qo- "${SCRIPT_URL}/${NODE_SCRIPT}?dl=1" -O "${NODE_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 755 ${NODE_SCRIPT}
   if [[ ${EUID} = 0 ]]
@@ -693,7 +680,7 @@ _install_energi3 () {
   then
     mv ${MN_SCRIPT} ${MN_SCRIPT}.old
   fi  
-  wget -4qo- "${SCRIPT_URL}/scripts/${MN_SCRIPT}?dl=1" -O "${MN_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
+  wget -4qo- "${SCRIPT_URL}/${MN_SCRIPT}?dl=1" -O "${MN_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 755 ${MN_SCRIPT}
   if [[ ${EUID} = 0 ]]
@@ -706,7 +693,7 @@ _install_energi3 () {
   then
     mv ${JS_SCRIPT} ${JS_SCRIPT}.old
   fi
-  wget -4qo- "${SCRIPT_URL}/js/${JS_SCRIPT}?dl=1" -O "${JS_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
+  wget -4qo- "${BASE_URL}/utils/${JS_SCRIPT}?dl=1" -O "${JS_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 644 ${JS_SCRIPT}
   if [[ ${EUID} = 0 ]]
@@ -1375,7 +1362,40 @@ _store_keystore_pw () {
   unset CHARCOUNT
 }
 
-_v2_balance() {
+_stop_energi3 () {
+
+  # Check if energi3 process is running and stop it
+  
+  ENERGI3PID=`ps -ef | grep energi3 | grep -v "grep energi3" | grep -v "color=auto" | awk '{print $2}' `
+  if [ ! -z "${ENERGI3PID}" ]
+  then
+    echo "Stopping Energi v3"
+    echo "Code to stop energi3 to be added. Open a new windoes and exit energi3 node."
+    sleep 3
+  else
+    echo "Energi v3 is not running on this server"
+    echo "Energi v3 is not running on this server"
+    sleep 3
+  fi
+}
+
+_stop_energi2 () {
+
+  # Check if energi2 process is running and stop it
+  
+  ENERGI2PID=`ps -ef | grep energid | grep -v "grep energid" | grep -v "color=auto" | awk '{print $2}' `
+  if [ ! -z "${ENERGI2PID}" ]
+  then
+    echo "Stopping Energi v2"
+    energi-cli stop
+    sleep 3
+  else
+    echo "Energi v2 is not running on this server"
+    sleep 3
+  fi
+}
+
+_check_v2_balance() {
 
   # Output info.
   echo "Placeholder"
