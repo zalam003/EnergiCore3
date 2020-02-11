@@ -1184,7 +1184,7 @@ _copy_keystore() {
       chmod 700 ${CONF_DIR}/keystore
       if [[ ${EUID} = 0 ]]
       then
-        chown "${USRNAME}":"${USRNAME}" ${CONF_DIR}/keystore
+        chown -R "${USRNAME}":"${USRNAME}" "${CONF_DIR}"
       fi
       KEYSTORE_EXIST=''
     fi
