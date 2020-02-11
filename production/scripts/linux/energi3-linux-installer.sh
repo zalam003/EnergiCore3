@@ -1043,9 +1043,17 @@ _add_rsa_key() {
     SSH_TEST=$( ssh-keygen -l -f "${TEMP_RSA_FILE}"  2>/dev/null )
     if [[ "${#SSH_TEST}" -gt 10 ]]
     then
+      if [[ ! -d "${USRHOME}/.ssh" ]]
+      then
+        mkdir -p "${USRHOME}/.ssh"
+      fi
       touch "${USRHOME}/.ssh/authorized_keys"
       chmod 644 "${USRHOME}/.ssh/authorized_keys"
       echo "${SSH_RSA_PUBKEY}" >> "${USRHOME}/.ssh/authorized_keys"
+      if [[ ${EUID} = 0 ]]
+      then
+        chown -R ${USRNAME}:${USRNAME} "${USRHOME}/.ssh"
+      fi
       echo "Added ${SSH_TEST}"
       echo
       break
