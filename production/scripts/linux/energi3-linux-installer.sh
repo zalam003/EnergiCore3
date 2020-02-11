@@ -1122,13 +1122,12 @@ _copy_keystore() {
   echo "This script uses https://send.firefox.com/ to transfer files from your"
   echo "desktop computer onto the vps. You can read more about the service here"
   echo "https://en.wikipedia.org/wiki/Firefox_Send"
-  sleep 5
+  sleep .3
   echo
   echo "Shutdown your desktop Energi v3 node and upload the keystore file to"
   echo "https://send.firefox.com/"
-  sleep 2
   echo "Paste in the URL to your keystore file below:"
-  sleep 2
+  sleep .3
   echo
   REPLY=''
   while [[ -z "${REPLY}" ]] || [[ "$( echo "${REPLY}" | grep -c 'https://send.firefox.com/download/' )" -eq 0 ]]
@@ -1140,7 +1139,7 @@ _copy_keystore() {
       read -p "Press Enter Once Done: " -r
       if [[ ${EUID} = 0 ]]
       then
-        chown "${USRNAME}":"${USRNAME}" "${CONF_DIR}/keystore/UTC*"
+        chown -R "${USRNAME}":"${USRNAME}" "${CONF_DIR}"
       fi
       chmod 600 "${CONF_DIR}/keystore/UTC*"
     fi
