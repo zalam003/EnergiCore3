@@ -4,4 +4,4 @@ https://github.com/energicryptocurrency/energi3
 
 # Vultr Hosting
 Use the following link to get a $100 credit: <br>
-https://www.vultr.com/?ref=8416836-6G
+https://www.vultr.com/?ref=8211464
