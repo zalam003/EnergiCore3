@@ -1070,7 +1070,7 @@ _check_clock() {
 
 _add_swap () {
   # Add 2GB additional swap
-  if [ ! /var/swapfile ]
+  if [ ! -f /var/swapfile ]
   then
     echo "Adding additional swap"
     ${SUDO} fallocate -l 2G /var/swapfile
@@ -1081,7 +1081,7 @@ _add_swap () {
     ${SUDO} echo -e "/var/swapfile\t none\t swap\t sw\t 0\t 0" >> /etc/fstab
     echo "Added 2GB swap space to the server"
   else
-    echo "No additional swap space added"
+    echo "Swap already exists. No additional swap space added."
   fi
 }
 
