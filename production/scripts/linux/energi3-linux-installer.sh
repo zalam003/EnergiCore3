@@ -179,6 +179,19 @@ _add_nrgstaker () {
     then
         chown ${USRNAME}:${USRNAME} /home/${USRNAME}/.sudo_as_admin_successful
     fi
+    
+    # Add PATH variable for Energi3
+    CHKBASHRC=`grep "Energi3 PATH" "${USRHOME}/.bashrc"`
+    if [ -z "${CHKBASHRC}" ]
+    then
+      echo "" >> "${USRHOME}/.bashrc"
+      echo "# Energi3 PATH" >> "${USRHOME}/.bashrc"
+      echo "export PATH=\${PATH}:\${HOME}/energi3/bin" >> "${USRHOME}/.bashrc"
+      echo
+      echo "  .bashrc updated with PATH variable"
+    else
+      echo "  .bashrc up to date. Nothing to add"
+    fi
     echo
     echo "${GREEN}*** User ${USRNAME} created and added to sudoer group                       ***${NC}"
     echo "${GREEN}*** User ${USRNAME} will be used to install the software and configurations ***${NC}"
@@ -1076,7 +1089,7 @@ _add_swap () {
     ${SUDO} fallocate -l 2G /var/swapfile
     ${SUDO} chmod 600 /var/swapfile
     ${SUDO} mkswap /var/swapfile
-    ${SUDO} swapon --label swap-2g /var/swapfile
+    ${SUDO} swapon /var/swapfile
 
     ${SUDO} echo -e "/var/swapfile\t none\t swap\t sw\t 0\t 0" >> /etc/fstab
     echo "Added 2GB swap space to the server"
