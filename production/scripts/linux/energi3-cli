@@ -1,0 +1,99 @@
+#!/bin/bash
+
+
+if [[ $# -eq 0 ]]
+then
+  $0 -h
+fi
+
+ARG=''
+COMMAND=''
+TMPCLI=`mktemp`
+
+while [[ $# -gt 0 ]]
+do
+  key="$1"
+
+  case $key in
+    -t|-testnet|--testnet)
+      ARG="$ARG -testnet"
+      shift
+      ;;
+    -mninfo|-masternodeinfo|--masternodeinfo)
+      COMMAND=mninfo
+      shift
+      ;;
+    -unlock|--unlock)
+      COMMAND=unlock
+      ADDR="$2"
+      ADDRPW="$3"
+      shift
+      shift
+      shift
+      ;;
+    -blocknumber)
+      COMMAND=blocknumber
+      shift
+      ;;
+    -stop)
+      COMMAND=halt
+      break
+      ;;
+    -d|--debug)
+      set -x
+      shift
+      ;;
+    -h|--help)
+      cat << EOL
+
+energi3-cli arguments:
+  -t -testnet                  : Run in testnet
+  -mninfo                      : Masternode information
+  -unlock <address> <password> : Unlock address for staking
+  -depositcollateral
+  -announce
+  -blocknumber
+  --bindip <address>           : Internal bind IP to use
+  -k --privatekey <key>        : Private key to use
+  -stop                        : Stop Energi3
+  -h --help                    : Display this help text
+  -d --debug                   : Debug mode
+
+EOL
+      exit
+      ;;
+    *)
+      $0 -h
+      ;;
+  esac
+done
+
+case ${COMMAND} in
+  halt)
+    EPID=`ps -ef | grep energi3 | grep console | awk '{print $2}'`
+    kill ${EPID}
+    ;;
+  mninfo)
+    energi3 ${ARG} --exec 'masternode.masternodeInfo(eth.coinbase)' attach 2>/dev/null
+    ;;
+  unlock)
+    energi3 ${ARG} --exec 'personal.unlockAccount($ADDR, "$ADDRPW", 0)' attach 2>/dev/null
+    ;;
+  depositcollateral)
+    energi3 ${ARG} --exec "masternode.depositCollateral(eth.coinbase, web3.toWei('$AMOUNT', 'ether'))" attach 2>/dev/null
+    #energi3 ${ARG} --exec "masternode.depositCollateral($ADDR, web3.toWei('$AMOUNT', 'ether'))" attach 2>/dev/null
+    #ADDR=eth.coinbase
+    ;;
+  announce)
+    energi3 ${ARG} --exec 'masternode.announce(eth.coinbase, admin.nodeInfo.enode)' attach attach 2>/dev/null
+    ;;
+  blocknumber)
+    energi3 ${ARG} --exec 'eth.blockNumber' attach 2>/dev/null
+    ;;
+
+
+esac
+
+#energi3 ${ARG} attach 1>${TMPCLI} 2>/dev/null
+#cat ${TMPCLI} | jq '.active'
+
