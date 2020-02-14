@@ -7,52 +7,103 @@ then
 fi
 
 ARG=''
-COMMAND=''
+OPTION=''
 TMPCLI=`mktemp`
 
 while [[ $# -gt 0 ]]
 do
-  key="$1"
+  key="$1"; shift
 
   case $key in
     -t|-testnet|--testnet)
       ARG="$ARG -testnet"
+      ;;
+    -l|-listaccounts)
+      OPTION=listaccounts
+      break
+      ;;
+    -newaccount)
+      OPTION=newaccount
+      NEWADDRPW="$1"
       shift
       ;;
     -mninfo|-masternodeinfo|--masternodeinfo)
-      COMMAND=mninfo
-      shift
+      OPTION=mninfo
+      ADDR=$1
+      break
       ;;
     -unlock|--unlock)
-      COMMAND=unlock
-      ADDR="$2"
-      ADDRPW="$3"
-      shift
-      shift
-      shift
+      OPTION=unlock
+      ADDR=$1
+      ADDRPW=$2
+      break
+      ;;
+    -depositcollateral)
+      OPTION=collateral
+      ADDR=$1
+      AMOUNT=$2
+      ADDRPW=$3
+      break
+      ;;
+    -collateralbalance)
+      OPTION=collateralbalance
+      ADDR=$1
+      break
+      ;;
+    -checkAllBalances
+      OPTION=checkAllBalances
+      break
+      ;;
+    -mnBalances
+      OPTION=mnBalances
+      break
+      ;;
+    -announce)
+      OPTION=announce
+      ADDR=$1
+      ADDRPW=$2
+      break
+      ;;
+    -stakestatus)
+      OPTION=stakestatus
+      break
+      ;;
+    -mnstatus)
+      OPTION=mnstatus
+      break
       ;;
     -blocknumber)
-      COMMAND=blocknumber
-      shift
+      OPTION=blocknumber
+      break
       ;;
     -stop)
-      COMMAND=halt
+      OPTION=halt
       break
       ;;
     -d|--debug)
       set -x
-      shift
       ;;
     -h|--help)
       cat << EOL
 
 energi3-cli arguments:
   -t -testnet                  : Run in testnet
+  -l -listaccounts             : List accounts
+  -newaccount <password>       : Create a new account
   -mninfo                      : Masternode information
   -unlock <address> <password> : Unlock address for staking
-  -depositcollateral
-  -announce
-  -blocknumber
+  -depositcollateral <address> <amount> <password>
+                               : depositCollateral to Masternode
+  -announce <address> <password>
+                               : announce
+  -withdrawcollateral <address> <amount> <password>
+                               : Withdraw Masternode Collateral
+  -collateralbalance           : Check Masternode Collateral Balance
+  -checkAllBalances            : Check balance of all Accounts
+  -mnBalances                  : Check Masternode Balance
+  -mnstatus                    : Check Masternode Status
+  -stakestatus                 : Check Staking Status
+  -blocknumber                 : Check blockNumber
   --bindip <address>           : Internal bind IP to use
   -k --privatekey <key>        : Private key to use
   -stop                        : Stop Energi3
@@ -68,32 +119,60 @@ EOL
   esac
 done
 
-case ${COMMAND} in
+COMMAND="energi3 ${ARG} --exec"
+
+case ${OPTION} in
   halt)
     EPID=`ps -ef | grep energi3 | grep console | awk '{print $2}'`
     kill ${EPID}
     ;;
+  listaccounts)
+    $COMMAND 'personal.listAccounts' attach 2>/dev/null
+    ;;
+  newaccount)
+    $COMMAND "personal.newAccount('$NEWADDRPW')" attach 2>/dev/null
+    ;;
   mninfo)
-    energi3 ${ARG} --exec 'masternode.masternodeInfo(eth.coinbase)' attach 2>/dev/null
+    if [[ -z "$ADDR" ]]
+    then
+      $COMMAND "masternode.masternodeInfo(eth.coinbase)" attach 2>/dev/null
+    else
+      $COMMAND "masternode.masternodeInfo('$ADDR')" attach 2>/dev/null
+    fi
     ;;
   unlock)
-    energi3 ${ARG} --exec 'personal.unlockAccount($ADDR, "$ADDRPW", 0)' attach 2>/dev/null
+    $COMMAND "personal.unlockAccount('$ADDR', '$ADDRPW', 0)" attach 2>/dev/null
     ;;
   depositcollateral)
-    energi3 ${ARG} --exec "masternode.depositCollateral(eth.coinbase, web3.toWei('$AMOUNT', 'ether'))" attach 2>/dev/null
-    #energi3 ${ARG} --exec "masternode.depositCollateral($ADDR, web3.toWei('$AMOUNT', 'ether'))" attach 2>/dev/null
-    #ADDR=eth.coinbase
+    $COMMAND "masternode.depositCollateral('$ADDR', web3.toWei('$AMOUNT', 'ether'), '$ADDRPW)" attach 2>/dev/null
+    ;;
+  withdrawcollateral)
+    $COMMAND "masternode.withdrawCollateral ('$ADDR', web3.toWei('$AMOUNT', 'ether'), '$ADDRPW')" attach 2>/dev/null
+    ;;
+  collateralbalance)
+    $COMMAND "masternode.collateralBalance('$ADDR')" attach 2>/dev/null
+    ;;
+  checkAllBalances)
+    $COMMAND "checkAllBalances" attach 2>/dev/null
+    ;;
+  mnBalances)
+    $COMMAND "mnBalances" attach 2>/dev/null
     ;;
   announce)
-    energi3 ${ARG} --exec 'masternode.announce(eth.coinbase, admin.nodeInfo.enode)' attach attach 2>/dev/null
+    $COMMAND "masternode.announce('$ADDR', admin.nodeInfo.enode, '$ADDRPW')" attach 2>/dev/null
     ;;
   blocknumber)
-    energi3 ${ARG} --exec 'eth.blockNumber' attach 2>/dev/null
+    $COMMAND 'eth.blockNumber' attach 2>/dev/null
     ;;
-
+  stakestatus)
+    $COMMAND 'personal.listWallets[0].status' attach 2>/dev/null
+    ;;
+  mnstatus)
+    $COMMAND 'masternode.masternodeInfo(eth.coinbase).isActive' attach 2>/dev/null
+    ;;
 
 esac
 
-#energi3 ${ARG} attach 1>${TMPCLI} 2>/dev/null
-#cat ${TMPCLI} | jq '.active'
+# done
+exit 0
 
