@@ -488,10 +488,12 @@ _check_ismainnet () {
     then
       export CONF_DIR=${USRHOME}/.energicore3
       export FWPORT=39797
+      export APPARG=''
       export isMainnet=y
       echo "The application will be setup for Mainnet"
     else
       export CONF_DIR=${USRHOME}/.energicore3/testnet
+      export APPARG='--testnet'
       export FWPORT=49797
       export isMainnet=n
       echo "The application will be setup for Testnet"
@@ -641,6 +643,40 @@ ENERGI3_LOGROTATE
 
   logrotate -f /etc/logrotate.d/energi3
   
+  fi
+}
+
+_add_systemd () {
+
+  # Setup systemd for autostart
+
+  if [ ! -f /lib/systemd/system/energi3.service ]
+  then
+    echo "Setting up systemctl for energi3"
+    sleep 0.3
+    
+  cat << SYSTEMD_CONF | ${SUDO} tee /lib/systemd/system/energi3.service >/dev/null
+[Unit]
+Description=Energi3 Start Service
+After=syslog.target network.target
+
+[Service]
+SyslogIdentifier=cftimer-test-energi3
+Restart=no
+RestartSec=5
+User=${USRNAME}
+Group=${USRNAME}
+UMask=0027
+ExecStart=/usr/bin/screen -S energi3 run_mn_linux.sh
+WorkingDirectory=${USRHOME}
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD_CONF
+
+  echo "Enabling energi3.service"
+  systemctl enable energi3.service
+
   fi
 }
 
@@ -1227,71 +1263,6 @@ _copy_keystore() {
 
 }
 
-_migrate_wallet () {
-
-  #V3WALLET_BALANCE=$( energi-cli getbalance )
-  ENERGI2PID=`ps -ef | grep energid | grep -v "grep energid" | grep -v "color=auto" | awk '{print $2}'`
-  if [ ! -z "${ENERGI2PID}" ]
-  then
-      V2WALLET_BALANCE=$( energi-cli getbalance )
-  fi
-  
-  if [[ "${V2WALLET_BALANCE}" == 0 ]]
-  then
-    echo "Current balance of the Energi v2 wallet on this computer is ${V2WALLET_BALANCE} NRG"
-    echo "Nothing to to migrate to Energi v3.  Continuing..."
-    return
-  else
-    echo "Current balance of the Energi v2 wallet on this computer is ${V2WALLET_BALANCE} NRG"
-    read -s -p "Enter passphrase for Energi v2 wallet: " WALLET2PASS
-    if [ ! -z "${WALLET2PASS}" ]
-    then
-      energi-cli walletpassphrase ${WALLET2PASS} 999
-      OTTTMPFILE=$( mktemp -p "${TMP_DIR}" )
-      energi-cli dumpwallet ${TMP_DIR}/energi2wallet.dump 2> ${OTTTMPFILE}
-      OTTPASS=`cat ${OTTTMPFILE} | grep "ONE TIME" | awk '{ print $5 }'`
-      energi-cli dumpwallet ${TMP_DIR}/energi2wallet.dump ${OTTPASS}
-      V2BLOCKCOUNT=$( energi-cli getblockcount )
-      rm -rf "${OTTTMPFILE}"
-      
-    else
-      echo "No passphrase entered for Energi v2 Wallet.  Nothing to migrate"
-      sleep 2
-      return
-    fi
-  fi
-  
-  if [[ -f ${TMP_DIR}/energi2wallet.dump ]]
-  then
-    if [[ "${isMainnet}" = 'y' ]]
-    then
-      if [[ "${V2BLOCKCOUNT}" = "${MAINNETSSBLOCK}" ]]
-      then
-        echo "Code to import into v3 goes here..."
-        sleep 3
-      else
-        echo "Energi v2 needs to sync with Network to start migration to Energi v3."
-        echo "The Snapshot Block ${MAINNETSSBLOCK} has not been reached"
-        sleep 0.3
-        return
-      fi
-      
-    else
-      if [[ "${V2BLOCKCOUNT}" = "${TESTNETSSBLOCK}" ]]
-      then
-        echo "Code to import into v3 goes here..."
-        sleep 3
-      else
-        echo "Energi v2 needs to sync with Network to start migration to Energi v3."
-        echo "The Snapshot Block ${MAINNETSSBLOCK} has not been reached"
-        sleep 0.3
-        return
-      fi 
-    fi
-    sleep 3
-  fi
-}
-
 _store_keystore_pw () {
 
   # Store keystore password for auto restart
@@ -1375,21 +1346,83 @@ _store_keystore_pw () {
   unset CHARCOUNT
 }
 
+_start_energi3 () {
+
+  # Start energi3
+  
+  SYSTEMCTLSTATUS=`systemctl status energi3.service | grep "Active:" | awk '{print $2}'`
+  if [[ "${SYSTEMCTLSTATUS}" -ne "Active" ]]
+  then
+    systemctl start energi3.service
+  else
+    echo "energi3 service is running..."
+  fi
+
+}
+
 _stop_energi3 () {
 
   # Check if energi3 process is running and stop it
   
-  ENERGI3PID=`ps -ef | grep energi3 | grep -v "grep energi3" | grep -v "color=auto" | awk '{print $2}' `
+  ENERGI3PID=`ps -ef | grep energi3 | grep console | grep -v "grep energi3" | grep -v "color=auto" | awk '{print $2}' `
+    
   if [ ! -z "${ENERGI3PID}" ]
   then
     echo "Stopping Energi v3"
-    echo "Code to stop energi3 to be added. Open a new windoes and exit energi3 node."
+    kill ${ENERGI3PID}
     sleep 3
   else
-    echo "Energi v3 is not running on this server"
+    echo
     echo "Energi v3 is not running on this server"
     sleep 3
   fi
+  
+}
+
+_start_energi2 () {
+
+  # Check if energi2 process is running and start if needed
+  
+  ENERGI2PID=`ps -ef | grep energid | grep -v "grep energid" | grep -v "color=auto" | awk '{print $2}' `
+  if [ -z "${ENERGI2PID}" ]
+  then
+    echo "Starting Energi v2"
+    energid ${APPARG} --daemon
+    sleep 3
+  else
+    echo "Energi v2 is already running on this server"
+    sleep 1
+  fi
+  
+  #V3WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
+  ENERGI2PID=`ps -ef | grep energid | grep -v "grep energid" | grep -v "color=auto" | awk '{print $2}'`
+  if [ ! -z "${ENERGI2PID}" ]
+  then
+      # check if v2 is syced with network
+      DAEMONSTAT=FALSE
+      while [ "$DAEMONSTAT" != "MASTERNODE_SYNC_FINISHED" ]
+      do
+        DAEMONSTAT=`energi-cli ${APPARG} mnsync status | grep AssetName | awk -F\" '{print $4}'`
+        clear
+        echo "energi v2 mnsync status: $DAEMONSTAT"
+        sleep 2
+      done
+      V2WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
+  else
+      _start_energi2
+      
+      # Wait till v2 syncs with network
+      DAEMONSTAT=FALSE
+      while [ "$DAEMONSTAT" != "MASTERNODE_SYNC_FINISHED" ]
+      do
+        DAEMONSTAT=`energi-cli ${APPARG} mnsync status | grep AssetName | awk -F\" '{print $4}'`
+        echo "energi v2 mnsync status: $DAEMONSTAT"
+        sleep 2
+      done
+      V2WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
+  fi
+
+
 }
 
 _stop_energi2 () {
@@ -1400,7 +1433,7 @@ _stop_energi2 () {
   if [ ! -z "${ENERGI2PID}" ]
   then
     echo "Stopping Energi v2"
-    energi-cli stop
+    energi-cli ${APPARG} stop
     sleep 3
   else
     echo "Energi v2 is not running on this server"
@@ -1410,19 +1443,50 @@ _stop_energi2 () {
 
 _check_v2_balance() {
 
-  # Output info.
+  #V3WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
+  ENERGI2PID=`ps -ef | grep energid | grep -v "grep energid" | grep -v "color=auto" | awk '{print $2}'`
+  if [ ! -z "${ENERGI2PID}" ]
+  then
+      # check if v2 is syced with network
+      DAEMONSTAT=FALSE
+      while [ "$DAEMONSTAT" != "MASTERNODE_SYNC_FINISHED" ]
+      do
+        DAEMONSTAT=`energi-cli ${APPARG} mnsync status | grep AssetName | awk -F\" '{print $4}'`
+        
+        echo "energi v2 mnsync status: $DAEMONSTAT"
+        sleep 2
+      done
+      V2WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
+  else
+      _start_energi2
+      
+      # Wait till v2 syncs with network
+      DAEMONSTAT=FALSE
+      while [ "$DAEMONSTAT" != "MASTERNODE_SYNC_FINISHED" ]
+      do
+        DAEMONSTAT=`energi-cli ${APPARG} mnsync status | grep AssetName | awk -F\" '{print $4}'`
+        echo "energi v2 mnsync status: $DAEMONSTAT"
+        sleep 2
+      done
+      V2WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
+  fi
+
+
+
+  # Check v2 Balance
   echo "Placeholder"
   echo
-  V2WALLET_BALANCE=$( energi-cli getbalance )
-  STAKE_INPUTS=$( energi-cli liststakeinputs )
+  V2WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
+  STAKE_INPUTS=$( energi-cli ${APPARG} liststakeinputs )
   STAKING_BALANCE=$( echo "${STAKE_INPUTS}" | jq '.[].amount' 2>/dev/null | awk '{s+=$1} END {print s}' 2>/dev/null )
   STAKING_INPUTS_COUNT=$( echo "${STAKE_INPUTS}" | grep -c 'amount' )
+  MN_LOCKED_COUNT=`energi-cli listlockunspent | grep txid | wc -l`
   echo -e "Current wallet.dat balance: \e[1m${V2WALLET_BALANCE}\e[0m"
   echo -e "Value of coins that can stake: \e[1m${STAKING_BALANCE}\e[0m"
   echo -e "Number of staking inputs: \e[1m${STAKING_INPUTS_COUNT}\e[0m"
   echo "Node info: ${USRNAME} ${CONF_FILE}"
   echo "Staking Status:"
-  energi-cli getstakingstatus | grep -C 20 --color -E '^|.*false'
+  energi-cli ${APPARG} getstakingstatus | grep -C 20 --color -E '^|.*false'
   CONF_FILE_BASENAME=$( basename "${CONF_FILE}" )
   echo
   echo "Start or Restart your desktop wallet after adding the line below to the"
@@ -1432,6 +1496,69 @@ _check_v2_balance() {
   echo "staking=0"
   echo
 
+}
+
+_migrate_wallet () {
+
+  # Start Energi v2
+  _start_energi2
+  _check_v2_balance
+
+  
+  if [[ "${V2WALLET_BALANCE}" == 0 ]]
+  then
+    echo "Current balance of the Energi v2 wallet on this computer is ${V2WALLET_BALANCE} NRG"
+    echo "Nothing to to migrate to Energi v3.  Continuing..."
+    return
+  else
+    echo "Current balance of the Energi v2 wallet on this computer is ${V2WALLET_BALANCE} NRG"
+    read -s -p "Enter passphrase for Energi v2 wallet: " WALLET2PASS
+    if [ ! -z "${WALLET2PASS}" ]
+    then
+      energi-cli ${APPARG} walletpassphrase ${WALLET2PASS} 999
+      OTTTMPFILE=$( mktemp -p "${TMP_DIR}" )
+      energi-cli ${APPARG} dumpwallet ${TMP_DIR}/energi2wallet.dump 2> ${OTTTMPFILE}
+      OTTPASS=`cat ${OTTTMPFILE} | grep "ONE TIME" | awk '{ print $5 }'`
+      energi-cli ${APPARG} dumpwallet ${TMP_DIR}/energi2wallet.dump ${OTTPASS}
+      V2BLOCKCOUNT=$( energi-cli ${APPARG} getblockcount )
+      rm -rf "${OTTTMPFILE}"
+      
+    else
+      echo "No passphrase entered for Energi v2 Wallet.  Nothing to migrate"
+      sleep 2
+      return
+    fi
+  fi
+  
+  if [[ -f ${TMP_DIR}/energi2wallet.dump ]]
+  then
+    if [[ "${isMainnet}" = 'y' ]]
+    then
+      if [[ "${V2BLOCKCOUNT}" = "${MAINNETSSBLOCK}" ]]
+      then
+        echo "Code to import into v3 goes here..."
+        sleep 3
+      else
+        echo "Energi v2 needs to sync with Network to start migration to Energi v3."
+        echo "The Snapshot Block ${MAINNETSSBLOCK} has not been reached"
+        sleep 0.3
+        return
+      fi
+      
+    else
+      if [[ "${V2BLOCKCOUNT}" = "${TESTNETSSBLOCK}" ]]
+      then
+        echo "Code to import into v3 goes here..."
+        sleep 3
+      else
+        echo "Energi v2 needs to sync with Network to start migration to Energi v3."
+        echo "The Snapshot Block ${MAINNETSSBLOCK} has not been reached"
+        sleep 0.3
+        return
+      fi 
+    fi
+    sleep 3
+  fi
 }
 
 _ascii_logo () {
@@ -2079,7 +2206,7 @@ case ${INSTALLTYPE} in
           _copy_keystore
         fi
         
-        _start_energiv3
+        _start_energi3
         
         REPLY=''
         read -p "Do you want the script to migrate Energi v2 wallet to v3 (y/[n])?: " -r
