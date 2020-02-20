@@ -138,7 +138,7 @@ _add_nrgstaker () {
     REPLY=''
     read -p "Do you want to select your own password [y]/n: "
     REPLY=${REPLY,,} # tolower
-    if [[ "${REPLY}" == "y" ]] || [[ -z "${REPLY}" ]]
+    if [[ "${REPLY}" = "y" ]] || [[ -z "${REPLY}" ]]
     then
       echo "You will be prompted to enter a secure password"
       echo
@@ -335,7 +335,7 @@ _check_install () {
             
           fi
                
-          ;;
+
       esac
       
       # Clean-up temporary file
@@ -407,7 +407,7 @@ _check_install () {
       
       echo "Upgrading Energi v3 as ${USRNAME}"
       
-      ;;
+
   
   esac
   
@@ -1463,7 +1463,7 @@ _check_v2_balance() {
         return
       fi
       sleep 2
-      done
+
   else
       _start_energi2
       
@@ -1590,7 +1590,7 @@ _dump_wallet () {
   fi
 }
 
-_claimGen2Coins {
+_claimGen2Coins () {
 
   # Claim gen2 coins into gen3
   
@@ -1934,7 +1934,7 @@ EOL
         ;;
     *)
         $0 -h
-        ;;
+
   esac
 done
 
@@ -2062,7 +2062,7 @@ case ${INSTALLTYPE} in
         echo "Restart the installer"
         exit 0
         
-        ;;
+
         
     esac
       
@@ -2174,11 +2174,11 @@ case ${INSTALLTYPE} in
         echo "Restart the installer"
         exit 0
         
-        ;;
+
         
     esac
     
-  ;;
+    ;;
   
   migrate)
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2304,7 +2304,8 @@ case ${INSTALLTYPE} in
         
         _stop_energi2
         
-        _start_energi3        
+        _start_energi3
+        
         ;;
       
       b)
@@ -2329,12 +2330,9 @@ case ${INSTALLTYPE} in
         echo
         echo "Restart the installer"
         exit 0
-        
-        ;;
-        
+   
     esac
-    
-  ;;
+
 esac
 
 ##
