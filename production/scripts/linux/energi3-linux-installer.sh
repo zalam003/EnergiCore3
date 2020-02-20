@@ -311,7 +311,9 @@ _check_install () {
                 exit 0
                 
               else
-                INSTALLTYPE=migrate
+                ###### disabling migration function for migration
+                #INSTALLTYPE=migrate
+                INSTALLTYPE=new
                 echo "Energi will be migrated from v2 to v3 as ${GREEN}${USRNAME}${NC}"
                 
               fi
@@ -1831,7 +1833,7 @@ ENERGI3
 echo "${GREEN}  \:\  /:/  /  ${NC}Welcome to the Energi v3 Installer."
 echo "${GREEN}   \:\/:/  /   ${NC}- New Install : No previous installs"
 echo "${GREEN}    \::/  /    ${NC}- Upgrade     : Upgrade previous version"
-echo "${GREEN}     \/__/     ${NC}- Migrate     : Migrate from Energi v2"
+echo "${GREEN}     \/__/     ${NC}- Migrate     : Migrate from Energi v2 (disabled)"
 echo ${NC}
 read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
 }
