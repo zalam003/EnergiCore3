@@ -266,7 +266,7 @@ _check_install () {
           echo
           
           isMigrate=""
-          read -p "Do you want to migrate from Energi v2 to v3 (y/[n]): "
+          read -p "Do you want to migrate from Energi v2 to v3 (y/[n]): " isMigrate
           isMigrate=${isMigrate,,}    # tolower
           
           if [ "${isMigrate}" = "y" ]
@@ -1443,20 +1443,27 @@ _stop_energi2 () {
 
 _check_v2_balance() {
 
-  #V3WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
+  # Return v2 Balance
+    
+  # Ensure energi v2 is running and get balance
   ENERGI2PID=`ps -ef | grep energid | grep -v "grep energid" | grep -v "color=auto" | awk '{print $2}'`
   if [ ! -z "${ENERGI2PID}" ]
   then
       # check if v2 is syced with network
       DAEMONSTAT=FALSE
-      while [ "$DAEMONSTAT" != "MASTERNODE_SYNC_FINISHED" ]
-      do
-        DAEMONSTAT=`energi-cli ${APPARG} mnsync status | grep AssetName | awk -F\" '{print $4}'`
-        
-        echo "energi v2 mnsync status: $DAEMONSTAT"
-        sleep 2
+      if [[ "$DAEMONSTAT" != "MASTERNODE_SYNC_FINISHED" ]]
+      then
+        clear
+        echo
+        echo "energi v2 sync status: ${RED}${DAEMONSTAT}${NC}"
+      else
+        clear
+        echo
+        echo "energi v2 sync status: ${GREEN}${DAEMONSTAT}{NC}"
+        return
+      fi
+      sleep 2
       done
-      V2WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
   else
       _start_energi2
       
@@ -1464,57 +1471,109 @@ _check_v2_balance() {
       DAEMONSTAT=FALSE
       while [ "$DAEMONSTAT" != "MASTERNODE_SYNC_FINISHED" ]
       do
-        DAEMONSTAT=`energi-cli ${APPARG} mnsync status | grep AssetName | awk -F\" '{print $4}'`
-        echo "energi v2 mnsync status: $DAEMONSTAT"
+        DAEMONSTAT=`energi-cli ${APPARG} mnsync status | jq -r .AssetName`
+        if [[ "$DAEMONSTAT" != "MASTERNODE_SYNC_FINISHED" ]]
+        then
+          clear
+          echo
+          echo "energi v2 sync status: ${RED}${DAEMONSTAT}${NC}"
+        else
+          clear
+          echo
+          echo "energi v2 sync status: ${GREEN}${DAEMONSTAT}{NC}"
+          return
+        fi
         sleep 2
       done
-      V2WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
   fi
 
-
-
-  # Check v2 Balance
-  echo "Placeholder"
-  echo
   V2WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
-  STAKE_INPUTS=$( energi-cli ${APPARG} liststakeinputs )
-  STAKING_BALANCE=$( echo "${STAKE_INPUTS}" | jq '.[].amount' 2>/dev/null | awk '{s+=$1} END {print s}' 2>/dev/null )
-  STAKING_INPUTS_COUNT=$( echo "${STAKE_INPUTS}" | grep -c 'amount' )
-  MN_LOCKED_COUNT=`energi-cli listlockunspent | grep txid | wc -l`
-  echo -e "Current wallet.dat balance: \e[1m${V2WALLET_BALANCE}\e[0m"
-  echo -e "Value of coins that can stake: \e[1m${STAKING_BALANCE}\e[0m"
-  echo -e "Number of staking inputs: \e[1m${STAKING_INPUTS_COUNT}\e[0m"
-  echo "Node info: ${USRNAME} ${CONF_FILE}"
-  echo "Staking Status:"
-  energi-cli ${APPARG} getstakingstatus | grep -C 20 --color -E '^|.*false'
-  CONF_FILE_BASENAME=$( basename "${CONF_FILE}" )
   echo
-  echo "Start or Restart your desktop wallet after adding the line below to the"
-  echo "desktop wallet's conf file ${CONF_FILE_BASENAME}. You can edit it from "
-  echo "the desktop wallet by going to Tools -> Open Wallet Configuration File"
+  echo -e "Energi v2 balance:${GREEN}${V2WALLET_BALANCE} NRG${NC}"
   echo
-  echo "staking=0"
-  echo
+  sleep 3
 
 }
 
-_migrate_wallet () {
+_check_v3_balance() {
 
-  # Start Energi v2
-  _start_energi2
+  #V3WALLET_BALANCE=$( energi-cli ${APPARG} getbalance )
+  ENERGI3PID=`ps -ef | grep energi3 | grep console | grep -v "grep energi3" | grep -v "color=auto" | awk '{print $2}'`
+  if [ ! -z "${ENERGI3PID}" ]
+  then
+      # check if v2 is syced with network
+      v3NODEBLOCKCOUNT="1"
+      V3APIBLOCKCOUNT="2"
+      while [ "$v3NODEBLOCKCOUNT" != "$V3APIBLOCKCOUNT" ]
+      do
+        v3NODEBLOCKCOUNT=`energi3 ${ARG} --exec 'eth.blockNumber' attach 2>/dev/null`
+        V3APIBLOCKCOUNT=`curl -s "https://explorer.test3.energi.network/api?module=block&action=eth_block_number"`
+        if [[ "$v3NODEBLOCKCOUNT" != "$V3APIBLOCKCOUNT" ]]
+        then
+          clear
+          echo
+          echo "energi v3 sync status: ${RED}NOT IN SYNC${NC}"
+        else
+          clear
+          echo
+          echo "energi v3 sync status: ${GREEN}IN SYNC${NC}"
+          return
+        fi
+        sleep 2
+      done
+  else
+      _start_energi3
+      
+      # Wait till v3 syncs with network
+      v3NODEBLOCKCOUNT="1"
+      V3APIBLOCKCOUNT="2"
+      while [ "$v3NODEBLOCKCOUNT" != "$V3APIBLOCKCOUNT" ]
+      do
+        v3NODEBLOCKCOUNT=`energi3 ${ARG} --exec 'eth.blockNumber' attach 2>/dev/null`
+        V3APIBLOCKCOUNT=`curl -s "https://explorer.test3.energi.network/api?module=block&action=eth_block_number"`
+        if [[ "$v3NODEBLOCKCOUNT" != "$V3APIBLOCKCOUNT" ]]
+        then
+          echo "energi v3 sync status: ${RED}NOT IN SYNC${NC}"
+        else
+          echo "energi v3 sync status: ${GREEN}IN SYNC${NC}"
+          return
+        fi
+        sleep 2
+      done
+  fi
+
+  # Check v3 Balance
+
+  V3WALLET_BALANCE=$( energi3 ${APPARG} --exec 'web3.fromWei(eth.getBalance(eth.coinbase), "ether")' attach 2>/dev/null )
+  echo
+  echo -e "Energi v3 balance:${GREEN}${V3WALLET_BALANCE}${NC}"
+  echo
+  sleep 3
+
+}
+
+_dump_wallet () {
+
+  # Get current balance on v2 for comparison
   _check_v2_balance
 
-  
+  # If v2 balance is 0, no need to migrate
   if [[ "${V2WALLET_BALANCE}" == 0 ]]
   then
     echo "Current balance of the Energi v2 wallet on this computer is ${V2WALLET_BALANCE} NRG"
-    echo "Nothing to to migrate to Energi v3.  Continuing..."
+    echo "Nothing to to migrate to Energi v3. Continuing..."
+    sleep 0.3
     return
   else
     echo "Current balance of the Energi v2 wallet on this computer is ${V2WALLET_BALANCE} NRG"
     read -s -p "Enter passphrase for Energi v2 wallet: " WALLET2PASS
     if [ ! -z "${WALLET2PASS}" ]
     then
+      # Unlock to create dump file
+      if [[ -f ${TMP_DIR}/energi2wallet.dump ]]
+      then
+        rm -f ${TMP_DIR}/energi2wallet.dump
+      fi
       energi-cli ${APPARG} walletpassphrase ${WALLET2PASS} 999
       OTTTMPFILE=$( mktemp -p "${TMP_DIR}" )
       energi-cli ${APPARG} dumpwallet ${TMP_DIR}/energi2wallet.dump 2> ${OTTTMPFILE}
@@ -1529,6 +1588,11 @@ _migrate_wallet () {
       return
     fi
   fi
+}
+
+_claimGen2Coins {
+
+  # Claim gen2 coins into gen3
   
   if [[ -f ${TMP_DIR}/energi2wallet.dump ]]
   then
@@ -1536,7 +1600,9 @@ _migrate_wallet () {
     then
       if [[ "${V2BLOCKCOUNT}" = "${MAINNETSSBLOCK}" ]]
       then
-        echo "Code to import into v3 goes here..."
+        IMPORTACCT=$( energi3 ${ARG} --exec "eth.coinbase" attach 2>/dev/null )
+        echo "Importing v2 NRG into v3 account: ${IMPORTACCT}"
+        energi3 ${ARG} --exec "energi.claimGen2CoinsCombined('${PASSWORD}', eth.coinbase, '${TMP_DIR}/energi2wallet.dump')" attach 2>/dev/null
         sleep 3
       else
         echo "Energi v2 needs to sync with Network to start migration to Energi v3."
@@ -1804,58 +1870,47 @@ POSITIONAL=()
 
 while [[ $# -gt 0 ]]
 do
-  key="$1"
+  key="$1"; shift
 
   case $key in
     -a|--advanced)
         ADVANCED="y"
-        shift
         ;;
     -n|--normal)
         ADVANCED="n"
         UFW="y"
         BOOTSTRAP="y"
-        shift
         ;;
     -i|--externalip)
         EXTERNALIP="$2"
         ARGUMENTIP="y"
         shift
-        shift
         ;;
     --bindip)
         BINDIP="$2"
-        shift
         shift
         ;;
     -k|--privatekey)
         KEY="$2"
         shift
-        shift
         ;;
     -u|--ufw)
         UFW="y"
-        shift
         ;;
     --no-ufw)
         UFW="n"
-        shift
         ;;
     -b|--bootstrap)
         BOOTSTRAP="y"
-        shift
         ;;
     --no-bootstrap)
         BOOTSTRAP="n"
-        shift
         ;;
     --no-interaction)
         INTERACTIVE="n"
-        shift
         ;;
     -d|--debug)
         set -x
-        shift
         ;;
     -h|--help)
         cat << EOL
@@ -1877,9 +1932,8 @@ Energi3 installer arguments:
 EOL
         exit
         ;;
-    *)    # unknown option
-        POSITIONAL+=("$1") # save it in an array for later
-        shift
+    *)
+        $0 -h
         ;;
   esac
 done
@@ -2206,18 +2260,37 @@ case ${INSTALLTYPE} in
           _copy_keystore
         fi
         
-        _start_energi3
-        
         REPLY=''
         read -p "Do you want the script to migrate Energi v2 wallet to v3 (y/[n])?: " -r
         REPLY=${REPLY,,} # tolower
         if [[ "${REPLY}" == 'y' ]]
         then
-          _migrate_wallet
+          _start_energi2
+          _dump_wallet
+          _check_v2_balance
+          echo "Stopping energi v2"
+          _stop_energi2
+          
+          echo "dump from enervi v2 safed in ${TMP_DIR}/energi2wallet.dump"
+          sleep 3
+          
+          #start energi3 to start import of v2 dump
+          _start_energi3
+          _claimGen2Coins
+          _check_v3_balance
+          
+          if [[ ${V2WALLET_BALANCE} != ${V3WALLET_BALANCE} ]]
+          then
+          echo
+          echo "${RED}*** CAUTION: There is a discrepency between energi v2 balance and energi v3 balance!!! ***"
+          echo "*** Please reconcile after the migration process is complete.                          ***${NC}"4
+          echo
+          sleep 3
         else
-          echo "You have chosen to manually migrate Energi v2 Wallet to v3. Please"
-          echo "look at the website for details on how to manually migrate using"
-          echo "Energi Core Wallet and MEW or Energi v3 Node."
+          echo
+          echo "You have chosen to manually migrate Energi v2 to v3. Please look at Github document"
+          echo "on how to manually migrate using Nexus and EnergiWallet."
+          echo
           sleep 3
         fi
         
@@ -2229,6 +2302,9 @@ case ${INSTALLTYPE} in
           _store_keystore_pw
         fi
         
+        _stop_energi2
+        
+        _start_energi3        
         ;;
       
       b)
