@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Run:
+: '
+# Run the script to get started:
+```
+bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/build_testnet_energi_v2_vps.sh)" ; source ~/.bashrc
+```
+'
+#
+
 if [ ! -d $HOME/.energicore/testnet1 ]
 then
         mkdir -p $HOME/.energicore/testnet1
@@ -12,8 +21,8 @@ then
   echo "Setting up energi.conf"
 
 cat << ENERGI_CONF | tee $HOME/.energicore/testnet1/energi.conf >/dev/null
-        rpcuser=nrg_rpc
-rpcpassword=qjsDgPgb5QHSkuBvDih2PQc6Q1qE4Amsdv2aoHbjMFrC
+rpcuser=nrg_rpc
+rpcpassword=asdfa9jofinasidfaiqqwnnnd
 rpcbind=127.0.0.1
 rpcallowip=127.0.0.1
 rpcport=55711
