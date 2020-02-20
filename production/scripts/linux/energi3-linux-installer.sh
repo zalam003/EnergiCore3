@@ -334,7 +334,7 @@ _check_install () {
             export ENERGI3_HOME=${USRHOME}/energi3
             
           fi
-               
+          ;;    
 
       esac
       
@@ -406,8 +406,7 @@ _check_install () {
       fi
       
       echo "Upgrading Energi v3 as ${USRNAME}"
-      
-
+      ;;
   
   esac
   
@@ -1870,7 +1869,8 @@ POSITIONAL=()
 
 while [[ $# -gt 0 ]]
 do
-  key="$1"; shift
+  key="$1"
+  shift
 
   case $key in
     -a|--advanced)
@@ -1934,7 +1934,7 @@ EOL
         ;;
     *)
         $0 -h
-
+        ;;
   esac
 done
 
@@ -2061,9 +2061,8 @@ case ${INSTALLTYPE} in
         echo
         echo "Restart the installer"
         exit 0
-        
+        ;;
 
-        
     esac
       
     ;;
@@ -2154,7 +2153,6 @@ case ${INSTALLTYPE} in
       b)
         # Install monitoring on Discord and/or Telegram
         echo "Monitoring functionality to be added"
-        
         ;;
         
       x)
@@ -2163,7 +2161,6 @@ case ${INSTALLTYPE} in
         echo
         echo "Nothing to install.  Exiting from the installer."
         exit 0
-    
         ;;
   
       h)
@@ -2173,11 +2170,9 @@ case ${INSTALLTYPE} in
         echo
         echo "Restart the installer"
         exit 0
-        
-
+        ;;
         
     esac
-    
     ;;
   
   migrate)
@@ -2330,8 +2325,9 @@ case ${INSTALLTYPE} in
         echo
         echo "Restart the installer"
         exit 0
-   
+        ;;
     esac
+    ;;
 
 esac
 
