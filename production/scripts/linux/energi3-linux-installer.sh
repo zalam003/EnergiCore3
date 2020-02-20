@@ -466,8 +466,8 @@ _setup_appdir () {
   
   echo "Changing ownership of ${ENERGI3_HOME} to ${USRNAME}"
   if [[ ${EUID} = 0 ]]
-    then
-      chown -R ${USRNAME}:${USRNAME} ${ENERGI3_HOME}
+  then
+    chown -R ${USRNAME}:${USRNAME} ${ENERGI3_HOME}
   fi
   
 }
@@ -654,7 +654,7 @@ _add_systemd () {
     echo "Setting up systemctl for energi3"
     sleep 0.3
     
-  cat << SYSTEMD_CONF | ${SUDO} tee /lib/systemd/system/energi3.service >/dev/null
+    cat << SYSTEMD_CONF | ${SUDO} tee /lib/systemd/system/energi3.service >/dev/null
 [Unit]
 Description=Energi3 Start Service
 After=syslog.target network.target
@@ -673,8 +673,8 @@ WorkingDirectory=${USRHOME}
 WantedBy=multi-user.target
 SYSTEMD_CONF
 
-  echo "Enabling energi3.service"
-  systemctl enable energi3.service
+    echo "Enabling energi3.service"
+    systemctl enable energi3.service
 
   fi
 }
@@ -2202,7 +2202,9 @@ case ${INSTALLTYPE} in
     
     case ${REPLY} in
       a)
-        # Install packages
+        # New server installation of Energi v3
+        
+        # ==> Run as root / sudo <==
         _install_apt
         _restrict_logins
         _check_ismainnet
@@ -2211,34 +2213,29 @@ case ${INSTALLTYPE} in
         _add_swap
         _add_logrotate
         
-        if [[ -s "${USRHOME}/.google_authenticator" ]]
+        # Check if user wants to install 2FA
+        clear 2> /dev/null
+        echo "2-Factor Authentication (2FA) require you to enter a 6 digit one-time password"
+        echo "(OTP) after you login to the server. You need to install ${GREEN}Google Authenticator${NC}"
+        echo "on your mobile to enable the 2FA. The OTP changes every 60 sec. This will secure"
+        echo "your server and restrict who can login."
+        echo
+        
+        REPLY=''
+        read -p "Do you want to install 2-Factor Authentication [Y/n]?: " -r
+        REPLY=${REPLY,,} # tolower
+        if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
         then
-          # 2FA not installed. Ask if user wants to install
-          clear 2> /dev/null
-          echo "2-Factor Authentication (2FA) require you to enter a 6 digit one-time password"
-          echo "(OTP) after you login to the server. You need to install ${GREEN}Google Authenticator${NC}"
-          echo "on your mobile to enable the 2FA. The OTP changes every 60 sec. This will secure"
-          echo "your server and restrict who can login."
-          echo          
-          REPLY=''
-          read -p "Do you want to install 2-Factor Authentication [Y/n]?: " -r
-          REPLY=${REPLY,,} # tolower
-          if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
-          then
-            _setup_two_factor
-          fi
+          _setup_two_factor
         fi
         
-        if [[ -s "${USRHOME}/.ssh/authorized_keys" ]]
+        # Check if user wants to install RSA for key based login
+        REPLY=''
+        read -p "Do you want to install RSA Key [Y/n]?: " -r
+        REPLY=${REPLY,,} # tolower
+        if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
         then
-          # Check if user wants to install RSA for key based login
-          REPLY=''
-          read -p "Do you want to install RSA Key [[y]/n]?: " -r
-          REPLY=${REPLY,,} # tolower
-          if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
-          then
-            _add_rsa_key
-          fi
+          _add_rsa_key
         fi
 
         #
@@ -2254,41 +2251,7 @@ case ${INSTALLTYPE} in
         then
           _copy_keystore
         fi
-        
-        REPLY=''
-        read -p "Do you want the script to migrate Energi v2 wallet to v3 (y/[n])?: " -r
-        REPLY=${REPLY,,} # tolower
-        if [[ "${REPLY}" == 'y' ]]
-        then
-          _start_energi2
-          _dump_wallet
-          _check_v2_balance
-          echo "Stopping energi v2"
-          _stop_energi2
-          
-          echo "dump from enervi v2 safed in ${TMP_DIR}/energi2wallet.dump"
-          sleep 3
-          
-          #start energi3 to start import of v2 dump
-          _start_energi3
-          _claimGen2Coins
-          _check_v3_balance
-          
-          if [[ ${V2WALLET_BALANCE} != ${V3WALLET_BALANCE} ]]
-          then
-          echo
-          echo "${RED}*** CAUTION: There is a discrepency between energi v2 balance and energi v3 balance!!! ***"
-          echo "*** Please reconcile after the migration process is complete.                          ***${NC}"4
-          echo
-          sleep 3
-        else
-          echo
-          echo "You have chosen to manually migrate Energi v2 to v3. Please look at Github document"
-          echo "on how to manually migrate using Nexus and EnergiWallet."
-          echo
-          sleep 3
-        fi
-        
+
         REPLY=''
         read -p "Do you want to auto start Energi v3 Node after computer reboots ([y]/n)?: " -r
         REPLY=${REPLY,,} # tolower
@@ -2296,16 +2259,6 @@ case ${INSTALLTYPE} in
         then
           _store_keystore_pw
         fi
-        
-        _stop_energi2
-        
-        _start_energi3
-        
-        ;;
-      
-      b)
-        # Install monitoring on Discord and/or Telegram
-        echo "Monitoring functionality to be added"
         
         ;;
         
@@ -2326,7 +2279,9 @@ case ${INSTALLTYPE} in
         echo "Restart the installer"
         exit 0
         ;;
+
     esac
+
     ;;
 
 esac
