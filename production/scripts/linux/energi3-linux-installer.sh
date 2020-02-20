@@ -2203,8 +2203,6 @@ case ${INSTALLTYPE} in
     case ${REPLY} in
       a)
         # New server installation of Energi v3
-        
-        # ==> Run as root / sudo <==
         _install_apt
         _restrict_logins
         _check_ismainnet
@@ -2241,24 +2239,62 @@ case ${INSTALLTYPE} in
         #
         # ==> Run as user <==
         #
-        _setup_appdir
-        _install_energi3
+#        _setup_appdir
+#        _install_energi3
         
-        REPLY=''
-        read -p "Do you want to download keystore account file to the computer (y/[n])?: " -r
-        REPLY=${REPLY,,} # tolower
-        if [[ "${REPLY}" == 'y' ]]
-        then
-          _copy_keystore
-        fi
-
-        REPLY=''
-        read -p "Do you want to auto start Energi v3 Node after computer reboots ([y]/n)?: " -r
-        REPLY=${REPLY,,} # tolower
-        if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
-        then
-          _store_keystore_pw
-        fi
+#        REPLY=''
+#        read -p "Do you want to download keystore account file to the computer (y/[n])?: " -r
+#        REPLY=${REPLY,,} # tolower
+#        if [[ "${REPLY}" == 'y' ]]
+#        then
+#          _copy_keystore
+#        fi
+        
+#        REPLY=''
+#        read -p "Do you want the script to migrate Energi v2 wallet to v3 (y/[n])?: " -r
+#        REPLY=${REPLY,,} # tolower
+#        if [[ "${REPLY}" == 'y' ]]
+#        then
+#          _start_energi2
+#          _dump_wallet
+#          _check_v2_balance
+#          echo "Stopping energi v2"
+#          _stop_energi2
+          
+#          echo "dump from enervi v2 safed in ${TMP_DIR}/energi2wallet.dump"
+#          sleep 3
+          
+          #start energi3 to start import of v2 dump
+#          _start_energi3
+#          _claimGen2Coins
+#          _check_v3_balance
+          
+#          if [[ ${V2WALLET_BALANCE} != ${V3WALLET_BALANCE} ]]
+#          then
+#          echo
+#          echo "${RED}*** CAUTION: There is a discrepency between energi v2 balance and energi v3 balance!!! ***"
+#          echo "*** Please reconcile after the migration process is complete.                          ***${NC}"
+#          echo
+#          sleep 3
+#        else
+#          echo
+#          echo "You have chosen to manually migrate Energi v2 to v3. Please look at Github document"
+#          echo "on how to manually migrate using Nexus and EnergiWallet."
+#          echo
+#          sleep 3
+#        fi
+        
+#        REPLY=''
+#        read -p "Do you want to auto start Energi v3 Node after computer reboots ([y]/n)?: " -r
+#        REPLY=${REPLY,,} # tolower
+#        if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
+#        then
+#          _store_keystore_pw
+#        fi
+#        
+#        _stop_energi2
+        
+#        _start_energi3
         
         ;;
         
