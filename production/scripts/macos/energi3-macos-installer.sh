@@ -380,16 +380,18 @@ _upgrade_energi3 () {
 _copy_keystore() {
 
   # Copy Energi3 keystore file to computer
-  if [[ ! -d "${HOME}/Library/Application Support/EnergiCore3/keystore" ]]
+  if [[ ! -d "${HOME}/Library/EnergiCore3/keystore" ]]
   then
-    mkdir -p "${HOME}/Library/Application Support/EnergiCore3/keystore"
+    mkdir -p "${HOME}/Library/EnergiCore3/keystore"
   fi
+  clear
   echo
   echo "Copy the Gen 3 address file into the keystore directory.  You can open it by doing the following:"
   echo
   echo "Finder -> Menubar (top of screen) -> Go -> Utilities, open Terminal, type/paste in "
-  echo "open \"${HOME}/Library/Application Support/EnergiCore3/keystore\" "
+  echo "open \"${HOME}/Library/EnergiCore3/keystore\" "
   echo
+  read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
 
 }
 
