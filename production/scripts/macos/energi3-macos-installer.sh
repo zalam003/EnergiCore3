@@ -768,7 +768,7 @@ case ${INSTALLTYPE} in
         
         REPLY=''
         read -p "Do you want to download keystore account file to the computer (y/[n])?: " -r
-        REPLY=${REPLY,,} # tolower
+        #REPLY=${REPLY,,} # tolower
         if [[ "${REPLY}" == 'y' ]]
         then
           _copy_keystore
@@ -828,14 +828,6 @@ case ${INSTALLTYPE} in
         
         _setup_appdir
         _upgrade_energi3
-        
-        REPLY=''
-        read -p "Do you want to auto start Energi3 Node after computer reboots ([y]/n)?: " -r
-        REPLY=${REPLY,,} # tolower
-        if [[ "${REPLY}" == 'y' ]] || [[ -z "${REPLY}" ]]
-        then
-          _store_keystore_pw
-        fi
         
         ;;
       
