@@ -752,8 +752,9 @@ case ${INSTALLTYPE} in
     _menu_option_new
     
     REPLY='x'
-    read -p "Please select an option to get started (a or x): "
-    #REPLY=${REPLY,,} # tolower
+    read -p "Please select an option to get started (a or x): " -r
+    REPLY=$( echo "${REPLY}" | tr '[:upper:]' '[:lower:]' )
+
     if [ "${REPLY}" = "" ]
     then
       REPLY='h'
@@ -768,7 +769,8 @@ case ${INSTALLTYPE} in
         
         REPLY=''
         read -p "Do you want to download keystore account file to the computer (y/[n])?: " -r
-        #REPLY=${REPLY,,} # tolower
+        REPLY=$( echo "${REPLY}" | tr '[:upper:]' '[:lower:]' )
+
         if [[ "${REPLY}" == 'y' ]]
         then
           _copy_keystore
@@ -815,7 +817,7 @@ case ${INSTALLTYPE} in
     
     REPLY='x'
     read -p "Please select an option to get started (a or x): " -r
-    #REPLY=${REPLY,,} # tolower
+    REPLY=$( echo "${REPLY}" | tr '[:upper:]' '[:lower:]' )
     
     if [ "x${REPLY}" = "x" ]
     then
