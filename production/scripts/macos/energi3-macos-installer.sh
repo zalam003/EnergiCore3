@@ -753,7 +753,7 @@ case ${INSTALLTYPE} in
     
     REPLY='x'
     read -p "Please select an option to get started (a or x): "
-    REPLY=${REPLY,,} # tolower
+    #REPLY=${REPLY,,} # tolower
     if [ "${REPLY}" = "" ]
     then
       REPLY='h'
@@ -815,7 +815,7 @@ case ${INSTALLTYPE} in
     
     REPLY='x'
     read -p "Please select an option to get started (a or x): " -r
-    REPLY=${REPLY,,} # tolower
+    #REPLY=${REPLY,,} # tolower
     
     if [ "x${REPLY}" = "x" ]
     then
