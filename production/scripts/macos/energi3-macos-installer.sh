@@ -274,7 +274,15 @@ _install_energi3 () {
   then
     GITHUB_LATEST=`curl -s ${API_URL}`
   fi
-  BIN_URL=$( echo "${GITHUB_LATEST}" | jq -r '.assets[].browser_download_url' | grep -v debug | grep -v '.sig' | grep linux )
+    if [[ ! -x "$(command -v wget)" ]]
+  then
+    brew install wget
+  fi
+  if [[ ! -x "$(command -v jq)" ]]
+  then
+    brew install jq
+  fi
+  BIN_URL=$( echo "${GITHUB_LATEST}" | jq -r '.assets[].browser_download_url' | grep -v debug | grep -v '.sig' | grep darwin )
  
   # Download from repositogy
   echo "Downloading Energi Core Node and scripts"
@@ -283,7 +291,8 @@ _install_energi3 () {
   then
     mv ${ENERGI3_EXE} ${ENERGI3_EXE}.old
   fi
-  curl "${BIN_URL}" --output ${ENERGI3_EXE}
+  #curl "${BIN_URL}" --output ${ENERGI3_EXE}
+  wget -4qo- "${BIN_URL}" -O "${ENERGI3_EXE}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 755 ${ENERGI3_EXE}
   if [[ ${EUID} = 0 ]]
@@ -295,7 +304,8 @@ _install_energi3 () {
   then
     mv ${NODE_SCRIPT} ${NODE_SCRIPT}.old
   fi  
-  curl -sL "${SCRIPT_URL}/${NODE_SCRIPT}" > ${NODE_SCRIPT}
+  #curl -sL "${SCRIPT_URL}/${NODE_SCRIPT}" > ${NODE_SCRIPT}
+  wget -4qo- "${SCRIPT_URL}/${NODE_SCRIPT}?dl=1" -O "${NODE_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 755 ${NODE_SCRIPT}
   if [[ ${EUID} = 0 ]]
@@ -307,7 +317,8 @@ _install_energi3 () {
   then
     mv ${MN_SCRIPT} ${MN_SCRIPT}.old
   fi  
-  curl -sL "${SCRIPT_URL}/${MN_SCRIPT}" > ${MN_SCRIPT}
+  #curl -sL "${SCRIPT_URL}/${MN_SCRIPT}" > ${MN_SCRIPT}
+  wget -4qo- "${SCRIPT_URL}/${MN_SCRIPT}?dl=1" -O "${MN_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 755 ${MN_SCRIPT}
   if [[ ${EUID} = 0 ]]
@@ -320,7 +331,8 @@ _install_energi3 () {
   then
     mv ${JS_SCRIPT} ${JS_SCRIPT}.old
   fi
-  curl -sL "${BASE_URL}/utils/${JS_SCRIPT}" > ${JS_SCRIPT}
+  #curl -sL "${BASE_URL}/utils/${JS_SCRIPT}" > ${JS_SCRIPT}
+  wget -4qo- "${BASE_URL}/utils/${JS_SCRIPT}?dl=1" -O "${JS_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
   chmod 644 ${JS_SCRIPT}
   if [[ ${EUID} = 0 ]]
@@ -719,6 +731,8 @@ _welcome_instructions
 _os_arch
 
 # Check Install type and set ENERGI3_HOME
+echo
+echo "Checking system..."
 _check_install
 #read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
 
@@ -738,13 +752,13 @@ case ${INSTALLTYPE} in
     _menu_option_new
     
     REPLY='x'
-    read -p "Please select an option to get started (a or x): " -r
+    read -p "Please select an option to get started (a or x): "
     REPLY=${REPLY,,} # tolower
     if [ "${REPLY}" = "" ]
     then
       REPLY='h'
     fi
-    
+    echo "test"
     case ${REPLY} in
       a)
         # New server installation of Energi3
