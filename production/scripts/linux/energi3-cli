@@ -54,11 +54,11 @@ do
       ADDR=$1
       break
       ;;
-    -checkAllBalances
+    -checkAllBalances)
       OPTION=checkAllBalances
       break
       ;;
-    -mnBalances
+    -mnBalances)
       OPTION=mnBalances
       break
       ;;
@@ -154,7 +154,7 @@ case ${OPTION} in
     fi
     ;;
   enode)
-    $COMMAND "admin.nodeInfo.enode" 2>/dev/null
+    $COMMAND "admin.nodeInfo.enode" 2>/dev/null | jq -r '.[]'
     ;;
   unlock)
     $COMMAND "personal.unlockAccount('$ADDR', '$ADDRPW', 0)" 2>/dev/null
