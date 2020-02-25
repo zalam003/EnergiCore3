@@ -10,6 +10,12 @@ function checkAllBalances() {
     return true;
 };
 
+function checkBalance(acct) {
+    var acctBal = web3.fromWei(eth.getBalance(acct), "ether");
+    console.log(" account:\t" + acct + " \tbalance: " + acctBal + " NRG");
+    return true;
+};
+
 function mnBalances() {
     var totalBal = 0;
     for (var acctNum in eth.accounts) {
