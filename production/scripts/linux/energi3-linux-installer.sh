@@ -737,6 +737,9 @@ _version_gt() {
 
 _upgrade_energi3 () {
 
+  # Set PATH to energi3
+  export BIN_DIR=${ENERGI3_HOME}/bin
+  
   # Check the latest version in Github 
   
   GITHUB_LATEST=$( curl -s ${API_URL} )
