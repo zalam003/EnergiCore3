@@ -216,8 +216,8 @@ _check_install () {
   _check_runas
   
   CHKV3USRTMP=/tmp/chk_v3_usr.tmp
-  ${SUDO} find /home -name energi3.ipc | awk -F\/ '{print $3}' > ${CHKV3USRTMP}
-  ${SUDO} find /root -name energi3.ipc | awk -F\/ '{print $3}' >> ${CHKV3USRTMP}
+  ${SUDO} find /home -name nodekey | awk -F\/ '{print $3}' > ${CHKV3USRTMP}
+  ${SUDO} find /root -name nodekey | awk -F\/ '{print $3}' >> ${CHKV3USRTMP}
   V3USRCOUNT=`wc -l ${CHKV3USRTMP} | awk '{ print $1 }'`
   
   case ${V3USRCOUNT} in
