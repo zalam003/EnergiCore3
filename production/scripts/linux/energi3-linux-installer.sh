@@ -216,6 +216,7 @@ _check_install () {
   _check_runas
   
   CHKV3USRTMP=/tmp/chk_v3_usr.tmp
+  >${CHKV3USRTMP}
   ${SUDO} find /home -name nodekey | awk -F\/ '{print $3}' > ${CHKV3USRTMP}
   ${SUDO} find /root -name nodekey | awk -F\/ '{print $3}' >> ${CHKV3USRTMP}
   V3USRCOUNT=`wc -l ${CHKV3USRTMP} | awk '{ print $1 }'`
@@ -237,6 +238,7 @@ _check_install () {
       
       echo -n "Checking if Energi v2 is installed: "
       CHKV2USRTMP=/tmp/chk_v2_usr.tmp
+      >${CHKV2USRTMP}
       ${SUDO} find /home -name energi.conf | awk -F\/ '{print $3}' > ${CHKV2USRTMP}
       ${SUDO} find /root -name energi.conf | awk -F\/ '{print $3}' >> ${CHKV2USRTMP}
       V2USRCOUNT=`wc -l ${CHKV2USRTMP} | awk '{ print $1 }'`
@@ -265,85 +267,15 @@ _check_install () {
           
           echo "${GREEN}Installed${NC}"
           echo
-#          echo "You have two options to install Energi3:"
-#          echo "  1) Use the same user as used in Energi v2"
-#          echo "  2) Create a separate installation with a new installation"
-#          echo
-#          echo "For both options you can choose to manually migrate the wallet or automatically"
-#          echo "migrate all funds from Energi v2 to Energi3."
-#          echo
-#          
-#          isMigrate=""
-#          read -p "Do you want to migrate from Energi v2 to v3 (y/[n]): " isMigrate
-#          isMigrate=${isMigrate,,}    # tolower
-#          
-#          if [ "${isMigrate}" = "y" ]
-#          then
-#            # If there is multiple user accounts with energi.conf have user choose one
-#            I=1
-#            for U in `cat ${CHKV2USRTMP}`
-#            do
-#              # Create an array of USR and present for selection
-#              USR[${I}]=${U}
-#              echo "${I}: ${USR[${I}]}"
-#              ((I=I+1))
-#              if [ ${I} = ${V2USRCOUNT} ]
-#              then
-#                break
-#              fi
-#            done
-#            
-#            REPLY=""
-#            read -p "${BLUE}Select with user name to migrate:${NC} " REPLY
-#            
-#            if [ ${REPLY} -le ${V2USRCOUNT} ]
-#            then
-#              # Based on selection, assign from array of USR
-#              USRNAME="${USR[${REPLY}]}"
-#              
-#              if [[ "${USRNAME}" -ne "${RUNAS}" ]]
-#              then
-#                clear
-#                echo "You have to run the script as root or ${USRNAME}"
-#                echo "Login as ${USRNAME} and run the script again"
-#                exit 0
-#              fi
-#              
-#              export USRHOME=`grep "^${USRNAME}:" /etc/passwd | awk -F: '{print $6}'`
-#              export ENERGI3_HOME=${USRHOME}/energi3
-#              
-#              if [ -f ${ENERGI3_HOME}/etc/migrated_to_v3.log ]
-#              then
-#                echo "${RED}*** Energi v2 for user ${USRNAME} has already been migrated to Energi3 ***${NC}"
-#                echo "${RED}***                           Exiting Installer                          ***${NC}"
-#                exit 0
-#                
-#              else
-#                ###### disabling migration function for migration
-#                #INSTALLTYPE=migrate
-#                INSTALLTYPE=new
-#                echo "Energi will be migrated from v2 to v3 as ${GREEN}${USRNAME}${NC}"
-#                
-#              fi
-#              
-#            else
-#              echo "${RED}Invalid entry:${NC} Enter a number less than or equal to ${V3USRCOUNT}"
-#              _check_install
-#              
-#            fi
-#            
-#          else
-            USRNAME=nrgstaker
-            INSTALLTYPE=new
-            echo "Installing new version of Energi3 as ${USRNAME}"
-#            echo "Existing Energi v2 needs to be manually migrated to Energi3"
-            
-            _add_nrgstaker
-            
-            export USRHOME=`grep "^${USRNAME}:" /etc/passwd | awk -F: '{print $6}'`
-            export ENERGI3_HOME=${USRHOME}/energi3
-            
-#          fi
+          USRNAME=nrgstaker
+          INSTALLTYPE=new
+          echo "Installing new version of Energi3 as ${USRNAME}"
+          
+          _add_nrgstaker
+          
+          export USRHOME=`grep "^${USRNAME}:" /etc/passwd | awk -F: '{print $6}'`
+          export ENERGI3_HOME=${USRHOME}/energi3
+
           ;;    
 
       esac
@@ -356,13 +288,14 @@ _check_install () {
       
       # Upgrade existing version of Energi 3:
       #   * One instance of Energi3 is already installed
-      #   * energi3.ipc file exists
+      #   * nodekey file exists
       #   * Version on computer is older than version in Github
       
       export USRNAME=`cat ${CHKV3USRTMP}`
       INSTALLTYPE=upgrade
       echo "The script will upgrade to the latest version of energi3 from Github"
       echo "if available as user: ${GREEN}${USRNAME}${NC}"
+      sleep 0.3
       
       export USRHOME=`grep "^${USRNAME}:" /etc/passwd | awk -F: '{print $6}'`
       export ENERGI3_HOME=${USRHOME}/energi3
@@ -2192,7 +2125,7 @@ case ${INSTALLTYPE} in
         _add_swap
         _add_logrotate
         
-        if [[ -s "${USRHOME}/.google_authenticator" ]]
+        if [[ ! -s "${USRHOME}/.google_authenticator" ]]
         then
           # 2FA not installed. Ask if user wants to install
           clear 2> /dev/null
@@ -2211,7 +2144,7 @@ case ${INSTALLTYPE} in
           fi
         fi
         
-        if [[ -s "${USRHOME}/.ssh/authorized_keys" ]]
+        if [[ ! -s "${USRHOME}/.ssh/authorized_keys" ]]
         then
           # Check if user wants to install RSA for key based login
           REPLY=''
