@@ -11,7 +11,7 @@
 #         from v2 to v3.
 # 
 # Version:
-#   1.0.0 20200212 ZA Initial Script
+#   1.1.0 20200225 ZA Initial Script
 #
 : '
 # Run the script to get started:
@@ -38,13 +38,13 @@ export DEBIAN_FRONTEND=noninteractive
 # Locations of Repositories and Guide
 API_URL="https://api.github.com/repos/energicryptocurrency/energi3/releases/latest"
 # Production
-#BASE_URL="https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts"
+#BASE_URL="https://raw.githubusercontent.com/energicryptocurrency/energi3-provisioning/master/scripts"
 # Test
 BASE_URL="https://raw.githubusercontent.com/zalam003/EnergiCore3/master/production/scripts"
 SCRIPT_URL="${BASE_URL}/linux"
 TP_URL="${BASE_URL}/thirdparty"
-DOC_URL="https://energi.gitbook.io"
-#GITURL="https://raw.githubusercontent.com/energicryptocurrency/energi3"
+DOC_URL="https://docs.energi.software"
+S3URL="https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/"
 
 # Energi3 Bootstrap Settings
 #export BLK_HASH=gsaqiry3h1ho3nh
@@ -151,7 +151,7 @@ _add_nrgstaker () {
         ${SUDO} apt-get install -yq pwgen
       fi
       
-      USRPASSWD=`pwgen 8 1`
+      USRPASSWD=`pwgen 10 1`
       clear
       echo
 #      echo "Write down the following before continuing:"
@@ -706,21 +706,45 @@ _install_energi3 () {
   JS_SCRIPT=utils.js
   
   # Check Github for URL of latest version
-  if [ -z "${GITHUB_LATEST}" ]
+  if [ -z "${GIT_LATEST}" ]
   then
-    GITHUB_LATEST=`curl -s ${API_URL}`
+    GITHUB_LATEST=$( curl -s ${API_URL} )
+    GIT_VERSION=$( echo "${GITHUB_LATEST}" | jq -r '.tag_name' )
+    
+    # Extract latest version number without the 'v'
+    GIT_LATEST=$( echo ${GIT_VERSION} | sed 's/v//g' )
   fi
-  BIN_URL=$( echo "${GITHUB_LATEST}" | jq -r '.assets[].browser_download_url' | grep -v debug | grep -v '.sig' | grep linux )
+#  BIN_URL=$( echo "${GITHUB_LATEST}" | jq -r '.assets[].browser_download_url' | grep -v debug | grep -v '.sig' | grep linux )
  
   # Download from repositogy
   echo "Downloading Energi Core Node and scripts"
-  cd ${BIN_DIR}
-  if [ -f "${ENERGI3_EXE}" ]
+  if [ -d ${ENERGI3_HOME} ]
   then
-    mv ${ENERGI3_EXE} ${ENERGI3_EXE}.old
+    mv ${ENERGI3_HOME} ${ENERGI3_HOME}.old
   fi
-  wget -4qo- "${BIN_URL}" -O "${ENERGI3_EXE}" --show-progress --progress=bar:force:noscroll 2>&1
+  
+  cd ${USRHOME}
+  # Pull energi3 from Amazon S3
+  wget -4qo- "${S3URL}/${GIT_LATEST}/energi3-${GIT_LATEST}-linux-amd64-alltools.tgz" --show-progress --progress=bar:force:noscroll 2>&1
+  #wget -4qo- "${BIN_URL}" -O "${ENERGI3_EXE}" --show-progress --progress=bar:force:noscroll 2>&1
+  
   sleep 0.3
+  
+  # Rename directory
+  mv energi3-${GIT_LATEST}-linux-amd64 energi3
+  
+  # Check if software downloaded
+  if [ ! -d ${BIN_DIR} ]
+    echo "${RED}ERROR: energi3-${GIT_LATEST}-linux-amd64-alltools.tgz did not download${NC}"
+    sleep 5
+  fi
+  
+  # Create missing app directories
+  _setup_appdir
+  
+  
+  cd ${BIN_DIR}
+
   chmod 755 ${ENERGI3_EXE}
   if [[ ${EUID} = 0 ]]
   then
@@ -2023,7 +2047,7 @@ _os_arch
 
 # Check Install type and set ENERGI3_HOME
 _check_install
-read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
+#read -t 10 -p "Wait 10 sec or Press [ENTER] key to continue..."
 
 # Present menu to choose an option based on Installation Type determined
 case ${INSTALLTYPE} in
@@ -2089,7 +2113,6 @@ case ${INSTALLTYPE} in
         #
         # ==> Run as user <==
         #
-        _setup_appdir
         _install_energi3
         
         REPLY=''
@@ -2202,7 +2225,6 @@ case ${INSTALLTYPE} in
         #
         # ==> Run as user <==
         #
-        _setup_appdir
         _upgrade_energi3
         
         REPLY=''
@@ -2304,7 +2326,6 @@ case ${INSTALLTYPE} in
         #
         # ==> Run as user <==
         #
-        _setup_appdir
         _install_energi3
         
         REPLY=''
