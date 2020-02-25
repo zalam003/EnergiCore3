@@ -9,7 +9,7 @@
 ::       The script will upgrade an existing installation.
 ::
 :: Download and run the batch script to:
-:: explorer.exe https://raw.githubusercontent.com/energicryptocurrency/energi3/master/scripts/energi3-win-installer.bat
+:: explorer.exe https://raw.githubusercontent.com/energicryptocurrency/energi3-provisioning/master/scripts/windows/energi3-windows-installer.bat
 ::####################################################################
 
 setlocal ENABLEEXTENSIONS
@@ -44,7 +44,7 @@ set "ENERGI3_HOME=%ProgramFiles%\Energi3"
 :: Confirm Mainnet or Testnet
 :setNetwork
   set "isMainnet=Y"
-  set /p isMainnet="Are you setting up Mainnet [Y]/n: "
+::  set /p isMainnet="Are you setting up Mainnet [Y]/n: "
 
   if /I "%isMainnet%" == "Y" (
     set "DATA_DIR=EnergiCore3"
@@ -156,21 +156,17 @@ curl -o "%TMP_DIR%\gitversion.txt" "https://api.github.com/repos/energicryptocur
 ::   IF %%a=="tag_name" SET GIT_VERSION=%%b
 ::  )
   
-type appurl.tmp | "%BIN_DIR%\jq.exe" -r '.[] .tag_name' > "%TMP_DIR%\gitversion.tmp"
+type "%TMP_DIR%\gitversion.txt" | "%BIN_DIR%\jq.exe" -r .tag_name > "%TMP_DIR%\gitversion.tmp"
 set /p GIT_VERSION "%TMP_DIR%\gitversion.tmp"
 del "%TMP_DIR%\gitversion.tmp"
 set GIT_VERSION=%GIT_VERSION:v=%
 set GIT_VERSION=%GIT_VERSION:"=%
 set GIT_VERSION=%GIT_VERSION:,=%
 
-type "%TMP_DIR%\gitversion.txt" | "%BIN_DIR%\jq.exe" -r '.[] | select ( .name==energi3-windows-4.0-amd64.exe ) .browser_download_url' > "%TMP_DIR%\appurl.tmp"
+type "%TMP_DIR%\gitversion.txt" | "%BIN_DIR%\jq.exe" -r ".assets | .[] | select(.name==\"energi3-windows-4.0-amd64.exe\") .browser_download_url" > "%TMP_DIR%\appurl.tmp"
 set /p APPURL= < "%TMP_DIR%\appurl.tmp"
 del "%TMP_DIR%\appurl.tmp"
-
-echo %APPURL%
-exit /b
-
-::del "%TMP_DIR%\gitversion.txt"
+del "%TMP_DIR%\gitversion.txt"
 
 echo GIT_VERSION: %GIT_VERSION%
 if /I "%NEWINSTALL%" == "Y" goto :NEWVERSION
@@ -242,6 +238,9 @@ exit /b
   @echo Downloading staking batch script
   "%TMP_DIR%\wget.exe" --no-check-certificate --progress=bar:force:noscroll "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_windows.bat?dl=1" -O "%BIN_DIR%\run_windows.bat"
   
+  @echo Downloading Energi icon
+  "%TMP_DIR%\wget.exe" --no-check-certificate --progress=bar:force:noscroll "https://github.com/zalam003/EnergiCore3/blob/master/production/scripts/windows/energi3.ico?dl=1" -O "%BIN_DIR%\energi.ico"
+
   @echo Downloading masternode batch script
   "%TMP_DIR%\wget.exe" --no-check-certificate --progress=bar:force:noscroll "https://raw.githubusercontent.com/zalam003/EnergiCore3/master/publictest/scripts/run_mn_windows.bat?dl=1" -O "%BIN_DIR%\run_mn_windows.bat"
 
@@ -280,36 +279,34 @@ exit /b
 ::)
 
 :createshortcut
-if not exist "%userprofile%\Desktop\Energi3 Node.lnk" (
-  set "_a=%"
-  set "_b=AppData"
-  @echo set WshShell = WScript.CreateObject("WScript.Shell") > "%TMP_DIR%\CreateShortcut.vbs"
-  @echo sLinkFile = "%userprofile%\Desktop\Energi3.lnk" >> "%TMP_DIR%\CreateShortcut.vbs"
-  @echo Set oMyShortCut = WshShell.CreateShortcut(sLinkFile) >> "%TMP_DIR%\CreateShortcut.vbs"
-  @echo oMyShortcut.IconLocation = "%BIN_DIR%\energi.ico" >> "%TMP_DIR%\CreateShortcut.vbs"
-  if /I "%isMainnet%"=="Y" (
-    @echo oMyShortCut.TargetPath = "%windir%\System32\cmd.exe /c %BIN_DIR%\%EXE_NAME% console 2> %_a%userprofile%_a%\%_a%%_b%%_a%\%DATA_DIR%\debug.log" >> "%TMP_DIR%\CreateShortcut.vbs"
-  ) else (
-    @echo oMyShortCut.TargetPath = "%windir%\System32\cmd.exe /c %BIN_DIR%\%EXE_NAME% --testnet console 2> %_a%userprofile%_a%\%_a%%_b%%_a%\%DATA_DIR%\debug.log" >> "%TMP_DIR%\CreateShortcut.vbs"
-  )
-  @echo oMyShortCut.WorkingDirectory = "%BIN_DIR%" >> "%TMP_DIR%\CreateShortcut.vbs"
-  @echo oMyShortCut.Save >> "%TMP_DIR%\CreateShortcut.vbs"
-  cscript "%TMP_DIR%\CreateShortcut.vbs"
-  :: del "%TMP_DIR%\CreateShortcut.vbs"
-  @echo Energi3 shortcut created on Desktop
+@echo Set WshShell = WScript.CreateObject("WScript.Shell") > "%TMP_DIR%\CreateShortcut.vbs"
+@echo sLinkFile = "%userprofile%\Desktop\Energi3.lnk" >> "%TMP_DIR%\CreateShortcut.vbs"
+@echo Set oMyShortCut = WshShell.CreateShortcut(sLinkFile) >> "%TMP_DIR%\CreateShortcut.vbs"
+@echo oMyShortcut.IconLocation = "%BIN_DIR%\energi.ico" >> "%TMP_DIR%\CreateShortcut.vbs"
+if /I "%isMainnet%"=="Y" (
+  @echo oMyShortCut.TargetPath = "%BIN_DIR%\run_windows.bat" >> "%TMP_DIR%\CreateShortcut.vbs"
 ) else (
-  @echo Energi3 shortcut exists on Desktop.
-  @echo Nothing created.  Check to make sure it is up to date
+  @echo oMyShortCut.TargetPath = "%BIN_DIR%\run_windows.bat" >> "%TMP_DIR%\CreateShortcut.vbs"
 )
+@echo oMyShortCut.WorkingDirectory = "c:\Program Files\Energi3\bin" >> "%TMP_DIR%\CreateShortcut.vbs"
+@echo oMyShortCut.Save >> "%TMP_DIR%\CreateShortcut.vbs"
+
+if not exist "%userprofile%\Desktop\Energi3.lnk" (
+  cscript "%TMP_DIR%\CreateShortcut.vbs"
+  @echo Energi3 shortcut created on Desktop
+  ) else (
+  @echo Shortcut already exists
+) 
+:: del "%TMP_DIR%\CreateShortcut.vbs"
 
 :: Remove Energi 2.x network files
-set "RemoveEnergi2=N"
-set /p RemoveEnergi2="Do you want to remove Energi 2.x blockchain files (y/N): "
-if /I "%isMainnet%"=="Y" (
-  set "ENERGI2_CONF_DIR=%AppData%\EnergiCore"
-  ) else (
-  set "ENERGI2_CONF_DIR=%AppData%\EnergiCore\testnet"
-)
+::set "RemoveEnergi2=N"
+::set /p RemoveEnergi2="Do you want to remove Energi 2.x blockchain files (y/N): "
+::if /I "%isMainnet%"=="Y" (
+::  set "ENERGI2_CONF_DIR=%AppData%\EnergiCore"
+::  ) else (
+::  set "ENERGI2_CONF_DIR=%AppData%\EnergiCore\testnet"
+::)
 
 :energi2conf
 if /I "%RemoveEnergi2%"=="Y" (
@@ -399,18 +396,18 @@ color 0A
 cls
 @echo.
 @echo.
-@echo       ___
-@echo      /\  \
-@echo     /::\  \
-@echo    /:/\:\__\
-@echo   /:/ /:/ _/_
-@echo  /:/ /:/ /\__\  ______ _   _ ______ _____   _____ _____ ____  
-@echo  \:\ \/ /:/  / |  ____| \ | |  ____|  __ \ / ____|_   _|___ \ 
-@echo   \:\  /:/  /  | |__  |  \| | |__  | |__) | |  __  | |   __) |
-@echo    \:\/:/  /   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ < 
-@echo     \::/  /    | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
-@echo      \/__/     |______|_| \_|______|_|  \_\\_____|_____|____/ 
-@echo.
+::@echo       ___
+::@echo      /\  \
+::@echo     /::\  \
+::@echo    /:/\:\__\
+::@echo   /:/ /:/ _/_
+::@echo  /:/ /:/ /\__\  ______ _   _ ______ _____   _____ _____ ____  
+::@echo  \:\ \/ /:/  / |  ____| \ | |  ____|  __ \ / ____|_   _|___ \ 
+::@echo   \:\  /:/  /  | |__  |  \| | |__  | |__) | |  __  | |   __) |
+::@echo    \:\/:/  /   |  __| | . ` |  __| |  _  /| | |_ | | |  |__ < 
+::@echo     \::/  /    | |____| |\  | |____| | \ \| |__| |_| |_ ___) |
+::@echo      \/__/     |______|_| \_|______|_|  \_\\_____|_____|____/ 
+::@echo.
 @echo.
 color 0F
 @echo Congratulations! Energi Node Version %GIT_VERSION% is installed on this computer
