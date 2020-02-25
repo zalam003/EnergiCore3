@@ -735,6 +735,7 @@ _install_energi3 () {
   
   # Check if software downloaded
   if [ ! -d ${BIN_DIR} ]
+  then
     echo "${RED}ERROR: energi3-${GIT_LATEST}-linux-amd64-alltools.tgz did not download${NC}"
     sleep 5
   fi
