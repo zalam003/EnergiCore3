@@ -670,6 +670,7 @@ _install_energi3 () {
   
   # Rename directory
   mv energi3-${GIT_LATEST}-linux-amd64 energi3
+  rm energi3-${GIT_LATEST}-linux-amd64-alltools.tgz
   
   # Check if software downloaded
   if [ ! -d ${BIN_DIR} ]
@@ -733,7 +734,11 @@ _install_energi3 () {
     then
       chown ${USRNAME}:${USRNAME} ${JS_SCRIPT}
     fi
-  fi  
+  fi
+  
+  # Clean-up
+  rm -rf ${ENERGI3_HOME}.old
+  
   # Change to install directory
   cd
   
