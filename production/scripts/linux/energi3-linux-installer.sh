@@ -635,11 +635,11 @@ _install_energi3 () {
   # Download and install node software and supporting scripts
 
   # Name of scripts
-  #NODE_SCRIPT=start_staking.sh
-  #MN_SCRIPT=start_mn.sh
-  NODE_SCRIPT=run_linux.sh
-  MN_SCRIPT=run_mn_linux.sh
+  NODE_SCRIPT=start_staking.sh
+  MN_SCRIPT=start_mn.sh
   JS_SCRIPT=utils.js
+  #NODE_SCRIPT=run_linux.sh
+  #MN_SCRIPT=run_mn_linux.sh
   
   # Check Github for URL of latest version
   if [ -z "${GIT_LATEST}" ]
@@ -706,7 +706,7 @@ _install_energi3 () {
 
   if [ -f "${ENERGI3_HOME}.old/bin/${MN_SCRIPT}" ]
   then
-    mv "${ENERGI3_HOME}.old/bin/${MN_SCRIPT}" "${ENERGI3_HOME}/bin/{MN_SCRIPT}"
+    mv "${ENERGI3_HOME}.old/bin/${MN_SCRIPT}" "${ENERGI3_HOME}/bin/${MN_SCRIPT}"
   else
     wget -4qo- "${SCRIPT_URL}/${MN_SCRIPT}?dl=1" -O "${MN_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
     sleep 0.3
