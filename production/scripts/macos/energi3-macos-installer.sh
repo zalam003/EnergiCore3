@@ -299,7 +299,8 @@ _install_energi3 () {
   
   cd ${USRHOME}
   # Pull energi3 from Amazon S3
-  curl "${S3URL}/${GIT_LATEST}/energi3-${GIT_LATEST}-macos-amd64-alltools.tgz" --output energi3-${GIT_LATEST}-macos-amd64-alltools.tgz
+  pause
+  curl -fsSL "${S3URL}/${GIT_LATEST}/energi3-${GIT_LATEST}-macos-amd64-alltools.tgz" --output energi3-${GIT_LATEST}-macos-amd64-alltools.tgz
   #wget -4qo- "${S3URL}/${GIT_LATEST}/energi3-${GIT_LATEST}-macos-amd64-alltools.tgz" --show-progress --progress=bar:force:noscroll 2>&1
   #wget -4qo- "${BIN_URL}" -O "${ENERGI3_EXE}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
@@ -820,7 +821,7 @@ case ${INSTALLTYPE} in
     then
       REPLY='h'
     fi
-    echo "test"
+
     case ${REPLY} in
       a)
         # New server installation of Energi3
