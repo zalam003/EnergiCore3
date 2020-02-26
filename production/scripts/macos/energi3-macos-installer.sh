@@ -53,7 +53,7 @@ fi
 SCRIPT_URL="${BASE_URL}/macos"
 TP_URL="${BASE_URL}/thirdparty"
 DOC_URL="https://docs.energi.software"
-S3URL="https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/"
+S3URL="https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3"
 
 # Energi3 Bootstrap Settings
 #export BLK_HASH=gsaqiry3h1ho3nh
@@ -300,6 +300,7 @@ _install_energi3 () {
   cd ${USRHOME}
   # Pull energi3 from Amazon S3
   curl "${S3URL}/${GIT_LATEST}/energi3-${GIT_LATEST}-macos-amd64-alltools.tgz" --output energi3-${GIT_LATEST}-macos-amd64-alltools.tgz
+  https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/0.9.0/energi3-0.9.0-macos-amd64-alltools.tgz
   #wget -4qo- "${S3URL}/${GIT_LATEST}/energi3-${GIT_LATEST}-macos-amd64-alltools.tgz" --show-progress --progress=bar:force:noscroll 2>&1
   #wget -4qo- "${BIN_URL}" -O "${ENERGI3_EXE}" --show-progress --progress=bar:force:noscroll 2>&1
   sleep 0.3
