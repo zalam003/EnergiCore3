@@ -276,25 +276,19 @@ _install_energi3 () {
   JS_SCRIPT=utils.js
   #NODE_SCRIPT=run_macos.sh
   #MN_SCRIPT=run_mn_macos.sh
-
-  
-  if [[ ! -x "$(command -v jq)" ]]
-  then
-    curl -fsSL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64 --output "${HOME}/jq"
-    chmod 755 jq
-    #brew install jq
-  fi
   
   # Check Github for URL of latest version
   if [ -z "${GIT_LATEST}" ]
   then
+    curl -fsSL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64 --output "${HOME}/jq"
+    chmod 755 jq  
     GITHUB_LATEST=$( curl -s ${API_URL} )
     GIT_VERSION=$( echo "${GITHUB_LATEST}" | ${HOME}/jq -r '.tag_name' )
     
     # Extract latest version number without the 'v'
     GIT_LATEST=$( echo ${GIT_VERSION} | sed 's/v//g' )
+    rm "${HOME}/jq"
   fi
-  rm -f "${HOME}/jq"
  
   # Download from repositogy
   echo "Downloading Energi Core Node and scripts"
@@ -404,6 +398,12 @@ _upgrade_energi3 () {
   # Set PATH to energi3
   export BIN_DIR=${ENERGI3_HOME}/bin
 
+  if [[ -z ${GIT_LATEST} ]]
+  then
+    curl -fsSL https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64 --output "${HOME}/jq"
+    chmod 755 jq
+  fi
+  
   # Check the latest version in Github 
   
   GITHUB_LATEST=$( curl -s ${API_URL} )
@@ -422,6 +422,11 @@ _upgrade_energi3 () {
     echo "Latest version of Energi3 is installed: ${INSTALL_VERSION}"
     echo "Nothing to install"
     sleep 0.3
+  fi
+  
+  if [[ -x "${HOME}/jq" ]]
+  then
+    rm "${HOME}/jq"
   fi
 
 }
