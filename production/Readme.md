@@ -41,7 +41,7 @@ follows:
 | Bandwidth        | 1 Gb          | 2 Gb            |
 | Operating System | Ubuntu x86_64 | Ubuntu x86_64   |
 
-In this guide we are using a VPS from Vultr (https://vultr.com). 
+In this guide we are using a VPS from [Vultr](https://vultr.com). 
 
 Choose a server location that is closest to you and cost effective. For
 Staking/Masternode, the location is not important.
