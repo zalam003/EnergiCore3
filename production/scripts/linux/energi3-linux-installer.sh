@@ -703,7 +703,7 @@ _install_energi3 () {
     fi
   fi
 
-  if [ -f "${ENERGI3_HOME}.old/bin/{MN_SCRIPT}" ]
+  if [ -f "${ENERGI3_HOME}.old/bin/${MN_SCRIPT}" ]
   then
     mv "${ENERGI3_HOME}.old/bin/${MN_SCRIPT}" "${ENERGI3_HOME}/bin/{MN_SCRIPT}"
   else
