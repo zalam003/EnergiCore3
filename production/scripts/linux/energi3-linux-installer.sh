@@ -11,7 +11,7 @@
 #         from v2 to v3.
 # 
 # Version:
-#   1.1.0 20200225 ZA Initial Script
+#   1.2.0 20200226 ZA Initial Script
 #
 : '
 # Run the script to get started:
@@ -38,13 +38,16 @@ export DEBIAN_FRONTEND=noninteractive
 # Locations of Repositories and Guide
 API_URL="https://api.github.com/repos/energicryptocurrency/energi3/releases/latest"
 # Production
-#BASE_URL="https://raw.githubusercontent.com/energicryptocurrency/energi3-provisioning/master/scripts"
-# Test
-BASE_URL="https://raw.githubusercontent.com/zalam003/EnergiCore3/master/production/scripts"
+if [[ -z ${BASE_URL} ]]
+then
+  BASE_URL="raw.githubusercontent.com/energicryptocurrency/energi3-provisioning/master/scripts"
+fi
+#==> For testing set environment variable
+#BASE_URL="raw.githubusercontent.com/zalam003/EnergiCore3/master/production/scripts"
 SCRIPT_URL="${BASE_URL}/linux"
 TP_URL="${BASE_URL}/thirdparty"
 DOC_URL="https://docs.energi.software"
-S3URL="https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3/"
+S3URL="https://s3-us-west-2.amazonaws.com/download.energi.software/releases/energi3"
 
 # Energi3 Bootstrap Settings
 #export BLK_HASH=gsaqiry3h1ho3nh
@@ -660,7 +663,9 @@ _install_energi3 () {
   # Pull energi3 from Amazon S3
   wget -4qo- "${S3URL}/${GIT_LATEST}/energi3-${GIT_LATEST}-linux-amd64-alltools.tgz" --show-progress --progress=bar:force:noscroll 2>&1
   #wget -4qo- "${BIN_URL}" -O "${ENERGI3_EXE}" --show-progress --progress=bar:force:noscroll 2>&1
+  sleep 0.3
   
+  tar xvfz energi3-${GIT_LATEST}-linux-amd64-alltools.tgz
   sleep 0.3
   
   # Rename directory
@@ -685,43 +690,50 @@ _install_energi3 () {
     chown ${USRNAME}:${USRNAME} ${ENERGI3_EXE}
   fi    
   
-  if [ -f "${NODE_SCRIPT}" ]
+  if [ -f "${ENERGI3_HOME}.old/bin/${NODE_SCRIPT}" ]
   then
-    mv ${NODE_SCRIPT} ${NODE_SCRIPT}.old
-  fi  
-  wget -4qo- "${SCRIPT_URL}/${NODE_SCRIPT}?dl=1" -O "${NODE_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
-  sleep 0.3
-  chmod 755 ${NODE_SCRIPT}
-  if [[ ${EUID} = 0 ]]
-  then
-    chown ${USRNAME}:${USRNAME} ${NODE_SCRIPT}
+    mv "${ENERGI3_HOME}.old/bin/${NODE_SCRIPT}" "${ENERGI3_HOME}/bin/${NODE_SCRIPT}"
+  else
+    wget -4qo- "${SCRIPT_URL}/${NODE_SCRIPT}?dl=1" -O "${NODE_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
+    sleep 0.3
+    chmod 755 ${NODE_SCRIPT}
+    if [[ ${EUID} = 0 ]]
+    then
+      chown ${USRNAME}:${USRNAME} ${NODE_SCRIPT}
+    fi
   fi
 
-  if [ -f "${MN_SCRIPT}" ]
+  if [ -f "${ENERGI3_HOME}.old/bin/{MN_SCRIPT}" ]
   then
-    mv ${MN_SCRIPT} ${MN_SCRIPT}.old
-  fi  
-  wget -4qo- "${SCRIPT_URL}/${MN_SCRIPT}?dl=1" -O "${MN_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
-  sleep 0.3
-  chmod 755 ${MN_SCRIPT}
-  if [[ ${EUID} = 0 ]]
-  then
-    chown ${USRNAME}:${USRNAME} ${MN_SCRIPT}
+    mv "{ENERGI3_HOME}.old/bin/${MN_SCRIPT}" "${ENERGI3_HOME}/bin/{MN_SCRIPT}"
+  else
+    wget -4qo- "${SCRIPT_URL}/${MN_SCRIPT}?dl=1" -O "${MN_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
+    sleep 0.3
+    chmod 755 ${MN_SCRIPT}
+    if [[ ${EUID} = 0 ]]
+    then
+      chown ${USRNAME}:${USRNAME} ${MN_SCRIPT}
+    fi
   fi
 
+  if [ ! -d ${JS_DIR} ]
+  then
+    echo "    Creating directory: ${JS_DIR}"
+    mkdir -p ${JS_DIR}
+  fi  
   cd ${JS_DIR}
-  if [ -f "${JS_SCRIPT}" ]
+  if [ -f "${ENERGI3_HOME}.old/js/${JS_SCRIPT}" ]
   then
-    mv ${JS_SCRIPT} ${JS_SCRIPT}.old
-  fi
-  wget -4qo- "${BASE_URL}/utils/${JS_SCRIPT}?dl=1" -O "${JS_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
-  sleep 0.3
-  chmod 644 ${JS_SCRIPT}
-  if [[ ${EUID} = 0 ]]
-  then
-    chown ${USRNAME}:${USRNAME} ${JS_SCRIPT}
-  fi
-  
+    mv ${ENERGI3_HOME}.old/js/${JS_SCRIPT} ${JS_SCRIPT}
+  else
+    wget -4qo- "${BASE_URL}/utils/${JS_SCRIPT}?dl=1" -O "${JS_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
+    sleep 0.3
+    chmod 644 ${JS_SCRIPT}
+    if [[ ${EUID} = 0 ]]
+    then
+      chown ${USRNAME}:${USRNAME} ${JS_SCRIPT}
+    fi
+  fi  
   # Change to install directory
   cd
   
