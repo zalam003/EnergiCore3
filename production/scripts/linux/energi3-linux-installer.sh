@@ -705,7 +705,7 @@ _install_energi3 () {
 
   if [ -f "${ENERGI3_HOME}.old/bin/{MN_SCRIPT}" ]
   then
-    mv "{ENERGI3_HOME}.old/bin/${MN_SCRIPT}" "${ENERGI3_HOME}/bin/{MN_SCRIPT}"
+    mv "${ENERGI3_HOME}.old/bin/${MN_SCRIPT}" "${ENERGI3_HOME}/bin/{MN_SCRIPT}"
   else
     wget -4qo- "${SCRIPT_URL}/${MN_SCRIPT}?dl=1" -O "${MN_SCRIPT}" --show-progress --progress=bar:force:noscroll 2>&1
     sleep 0.3
@@ -761,7 +761,7 @@ _upgrade_energi3 () {
   GIT_LATEST=$( echo ${GIT_VERSION} | sed 's/v//g' )
   
   # Installed Version
-  INSTALL_VERSION=$( ${BIN_DIR}/${ENERGI3_EXE} version | grep "^Version" | awk '{ print $2 }' | awk -F\- '{ print $1 }' 2>/dev/null )
+  INSTALL_VERSION=$( ${BIN_DIR}/${ENERGI3_EXE} version 2>/dev/null | grep "^Version" | awk '{ print $2 }' | awk -F\- '{ print $1 }' )
   
   if _version_gt ${GIT_LATEST} ${INSTALL_VERSION}; then
     echo "Installing newer version ${GIT_VERSION} from Github"
