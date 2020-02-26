@@ -14,7 +14,7 @@ below shows the steps and the tools required to set up a Staking / Masternode.
 To migrate Gen 2 NRG to Gen 3 NRG, go to the following steps:
 
 1.  Guide on Creating Gen 3 Address:
-    [MyEnergiWallet](https://docs.energi.software/en/guides/myenergiwallet)
+    [MyEnergiWallet](https://docs.energi.software/en/how-to/myenergiwallet)
 
 2.  Guide on Migrating Gen 2 Coins: [Energi Core
     Wallet](https://docs.energi.software/en/how-to/migrate-gen2-wallet)
