@@ -1,8 +1,8 @@
 ---
-title: Provision Energi Gen 3 on Linux VPS
+## Provision Energi Gen 3 on Linux VPS
 ---
 
-Migrate Gen 2 Wallet to Gen 3 Address File
+1 Migrate Gen 2 Wallet to Gen 3 Address File
 ==========================================
 
 Before continuing with installation of Energi Core Node (aka energi3 software),
@@ -22,7 +22,7 @@ To migrate Gen 2 NRG to Gen 3 NRG, go to the following steps:
 You will need the Gen 3 Account Address File created in MyEnergiWallet during
 the installation process.
 
-Setup Linux VPS Server
+2 Setup Linux VPS Server
 ======================
 
 There are many cloud services available to setup a Virtual Private Server (VPS).
@@ -81,7 +81,7 @@ information on how to access it remotely.
 
 ![](media/54d76bfdbc395b34df535ee9753d71e7.png)
 
-**​**Login to your VPS
+3 Login to your VPS
 =====================
 
 You can open a console window within Vultr or use any SSH (secure shell)
@@ -126,7 +126,7 @@ Type passwd
 
 ![](media/8be3ce4ed9d8e7ab746b9de5c43db644.png)
 
-Run energi3 Provisioning Tool
+4 Run energi3 Provisioning Tool
 =============================
 
 Before you start the installation using the script, make sure you have the
@@ -164,7 +164,7 @@ to checking that the VPS meets the software requirements.
 
 ![](media/abd05ac549a8fe0ffe268161d239e9b3.png)
 
-Save Username / Password
+4.1 Save Username / Password
 ------------------------
 
 For a new Energi Gen 3 installation, the provisioning tool will create a user
@@ -175,7 +175,7 @@ the next step.
 
 ![](media/80080c6680dce850b8647a823ae89238.png)
 
- New Installation
+4.2 New Installation
 -----------------
 
 >   Select ‘a’ to install a new installation from the screen below:
@@ -306,7 +306,7 @@ message.
 
 Congratulations! You have installed energi3 on the VPS.
 
-How to Set up PuTTY to Login with RSA Key
+5 How to Set up PuTTY to Login with RSA Key
 =========================================
 
 Open a new PuTTY Configuration session. In the Hostname add:
