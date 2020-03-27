@@ -3,6 +3,9 @@ Materials for Public Test and Production Materials for Energi Gen 3.  This is a 
 https://github.com/energicryptocurrency/energi3-provisioning
 
 # Vultr Hosting
-Use the following link to get a $100 credit: <br>
+Use the following link to get a $100 credit for first 30 days of use: <br>
 <a href="https://www.vultr.com/?ref=8416836-6G" target="_blank"><img src="https://www.vultr.com/media/banners/banner_728x90.png" width="728" height="90"></a>
+
+
+
 
