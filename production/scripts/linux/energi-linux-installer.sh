@@ -19,6 +19,8 @@
 # Run the script to get started:
 ```
 bash -ic "$(wget -4qO- -o- raw.githubusercontent.com/energicryptocurrency/energi3-provisioning/master/scripts/linux/energi3-linux-installer.sh)" ; source ~/.bashrc
+
+curl raw.githubusercontent.com/energicryptocurrency/energi3-provisioning/master/scripts/linux/energi3-linux-installer.sh | bash -s arg1 arg2
 ```
 '
 ######################################################################
